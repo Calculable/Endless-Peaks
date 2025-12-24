@@ -117,66 +117,71 @@ struct ContentView: View {
             .fill(
                 Gradient(stops: [
                     .init(color: backgroundColor, location: 0),
-                    .init(color: Color.white, location: 0.5)
+                    .init(color: Color.white, location: 0.5),
                 ])
             )
+    }
+
+    var mountainsView: some View {
+        GeometryReader { geo in
+            ForEach(Array(mountains.enumerated()), id: \.1.id) {
+                (index, mountain) in
+
+                let nearness = nearness(index: index)
+
+                ZStack {
+                    Rectangle()
+                        .fill(
+                            Gradient(stops: [
+                                .init(color: backgroundColor, location: 0),
+                                .init(color: Color.white, location: 0.5),
+                            ])
+                        )
+                    /*Color.black.opacity(
+                        CGFloat(index) / CGFloat(numberOfMountains)
+                    )*/ // your 50% overlay base
+                    Color.black.opacity(nearness)
+                }
+                .clipShape(Mountain(configuration: mountain))
+                .scaleEffect(
+                    CGFloat(1) + (nearness) * 1.5,
+                    anchor: .top
+                )
+                .offset(
+                    x: 0,
+                    y: ((geo.size.height * nearness * nearness * nearness))  //initialzustand
+
+                        //+ nearness(index: index) * CGFloat(100.0)
+                        /* * bump(
+                            CGFloat(index) / CGFloat(numberOfMountains)
+                        )) //initialposition
+                    + nearness(index: index) * CGFloat(100.0) * CGFloat((index - 5))
+                        //+ (animationValue * CGFloat((index - 5) * 100))  //todo: nicht 5 hardcodiert*/
+                    // + nearness(index: index) * CGFloat(100.0)
+                )
+
+            }
+        }
     }
 
     @State private var mountains = [MountainConfiguration]()
 
     var body: some View {
         VStack {
+            GeometryReader { geo in
+
             ZStack {
-                GeometryReader { geo in
                     background
 
-                    ForEach(Array(mountains.enumerated()), id: \.1.id) {
-                        (index, mountain) in
-
-                        let nearness = nearness(index: index)
-
-                        ZStack {
-                            Rectangle()
-                                .fill(
-                                    Gradient(stops: [
-                                        .init(color: backgroundColor, location: 0),
-                                        .init(color: Color.white, location: 0.5)
-                                    ])
-                                )
-                            /*Color.black.opacity(
-                                CGFloat(index) / CGFloat(numberOfMountains)
-                            )*/  // your 50% overlay base
-                            Color.black.opacity(nearness)
-                        }
-                        .clipShape(Mountain(configuration: mountain))
-                        .scaleEffect(
-                            CGFloat(1) + (nearness)*1.5,
-                            anchor: .top
-                        )
-                        .offset(
-                            x: 0,
-                            y: ((geo.size.height * nearness * nearness * nearness) ) //initialzustand
-
-                            //+ nearness(index: index) * CGFloat(100.0)
-                               /* * bump(
-                                    CGFloat(index) / CGFloat(numberOfMountains)
-                                )) //initialposition
-                            + nearness(index: index) * CGFloat(100.0) * CGFloat((index - 5))
-                                //+ (animationValue * CGFloat((index - 5) * 100))  //todo: nicht 5 hardcodiert*/
-                           // + nearness(index: index) * CGFloat(100.0)
-                        )
-
-                    }
-
-
+                    mountainsView
 
 
                 }
 
             }
 
-            VStack {
-
+            /*VStack {
+            
                 Slider(
                     value: Binding(
                         get: { Double(maxPointsPerDepth) },
@@ -185,7 +190,7 @@ struct ContentView: View {
                     in: 1...10,
                     step: 1
                 )
-
+            
                 Slider(
                     value: Binding(
                         get: { Double(depth) },
@@ -194,7 +199,7 @@ struct ContentView: View {
                     in: 1...7,
                     step: 1
                 )
-
+            
                 Slider(
                     value: Binding(
                         get: { speed },
@@ -203,7 +208,7 @@ struct ContentView: View {
                     in: 0.01...1.0,
                     step: 0.01
                 )
-            }.padding()
+            }.padding()*/
         }
         .onAppear {
             regenerateMountains()
@@ -218,7 +223,7 @@ struct ContentView: View {
                         maxPointsPerDepth: maxPointsPerDepth,
                         depth: depth
                     )
-                    mountains.insert(mountain, at: 0) //könnte effizienter sein, wenn ich hinten anhänge
+                    mountains.insert(mountain, at: 0)  //könnte effizienter sein, wenn ich hinten anhänge
                     mountains.removeLast()
                 }
             }
@@ -242,11 +247,14 @@ struct ContentView: View {
         let animationValue = CGFloat(animationValue)
         let numberOfMountains = CGFloat(numberOfMountains)
 
-        return ((index + (((animationValue.truncatingRemainder(dividingBy: maxAnimationValue))/maxAnimationValue))) / numberOfMountains)
+        return
+            ((index
+            + (((animationValue.truncatingRemainder(
+                dividingBy: maxAnimationValue
+            )) / maxAnimationValue))) / numberOfMountains)
         //
 
-       // 19 +
-
+        // 19 +
 
     }
 
