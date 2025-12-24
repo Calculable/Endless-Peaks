@@ -102,11 +102,13 @@ final class DisplayRedrawDriver {
 
 struct ContentView: View {
     let numberOfMountains = 20
-    @State private var maxPointsPerDepth = 5
-    @State private var depth = 5
+    @State private var maxPointsPerDepth = 3
+    @State private var depth = 2
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
-    @State private var speed: CGFloat = 0.01
+    @State private var speed: CGFloat = 0.02
+
+    let backgroundColor = Color.yellow
 
     let maxAnimationValue = CGFloat(1)
 
@@ -114,8 +116,8 @@ struct ContentView: View {
         Rectangle()
             .fill(
                 Gradient(stops: [
-                    .init(color: Color.blue, location: 0)
-                    // .init(color: Color.white, location: 0.5)
+                    .init(color: backgroundColor, location: 0),
+                    .init(color: Color.white, location: 0.5)
                 ])
             )
     }
@@ -134,7 +136,13 @@ struct ContentView: View {
                         let nearness = nearness(index: index)
 
                         ZStack {
-                            Color.blue
+                            Rectangle()
+                                .fill(
+                                    Gradient(stops: [
+                                        .init(color: backgroundColor, location: 0),
+                                        .init(color: Color.white, location: 0.5)
+                                    ])
+                                )
                             /*Color.black.opacity(
                                 CGFloat(index) / CGFloat(numberOfMountains)
                             )*/  // your 50% overlay base
@@ -148,9 +156,6 @@ struct ContentView: View {
                         .offset(
                             x: 0,
                             y: ((geo.size.height * nearness * nearness * nearness) ) //initialzustand
-                            /** (1.0 - bump( //sinuskurve
-                                CGFloat(index) / CGFloat(numberOfMountains)
-                            ))*/
 
                             //+ nearness(index: index) * CGFloat(100.0)
                                /* * bump(
@@ -165,8 +170,6 @@ struct ContentView: View {
 
 
 
-                    Text("nearness: \(nearness(index: 19))")
-                        .foregroundStyle(.white)
 
                 }
 
