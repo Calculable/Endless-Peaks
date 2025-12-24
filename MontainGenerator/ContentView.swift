@@ -128,22 +128,36 @@ struct ContentView: View {
                     ForEach(Array(mountains.enumerated()), id: \.1.id) {
                         (index, mountain) in
 
+
                         ZStack {
                             Color.blue
                             Color.black.opacity(
                                 CGFloat(index) / CGFloat(numberOfMountains)
                             )  // your 50% overlay base
+                            /*Color.black.opacity(
+                                (nearness(index: index) / 1.0)
+                                    / CGFloat(numberOfMountains)*/
                         }
                         .clipShape(Mountain(configuration: mountain))
-                        .scaleEffect(CGFloat(1) + ((animationValue / CGFloat(10.0)) * CGFloat(index)), anchor: .top)
+                        .scaleEffect(
+                            CGFloat(1) + (nearness(index: index) / 10.0),
+                            anchor: .top
+                        )
                         .offset(
                             x: 0,
-                            y: (geo.size.height / Double(numberOfMountains))
+                            y: (geo.size.height / Double(numberOfMountains)
+                                * bump(
+                                    CGFloat(index) / CGFloat(numberOfMountains)
+                                )) //initialposition
                                 * Double(index)
-                                + (animationValue * CGFloat(index*100))
+                            + nearness(index: index) * CGFloat(100.0) * CGFloat((index - 5))
+                                //+ (animationValue * CGFloat((index - 5) * 100))  //todo: nicht 5 hardcodiert
                         )
 
                     }
+
+                    Text("nearness: \(nearness(index: 1))")
+                        .foregroundStyle(.white)
 
                 }
 
@@ -191,8 +205,16 @@ struct ContentView: View {
         }
     }
 
+    func nearness(index: Int) -> CGFloat {
+
+
+
+        return CGFloat(index) * animationValue
+    }
+
     func regenerateMountains() {
 
+        animationValue = 0
         mountains.removeAll()
 
         for _ in 0..<numberOfMountains {
@@ -204,12 +226,16 @@ struct ContentView: View {
         }
 
     }
+
+    func bump(_ x: CGFloat) -> CGFloat {
+        CGFloat(sin(Double.pi * Double(x)))
+    }
 }
 
 #if canImport(UIKit)
     import UIKit
     typealias PlatformColor = UIColor
-#elseif canImport(AppKit) 
+#elseif canImport(AppKit)
     import AppKit
     typealias PlatformColor = NSColor
 #endif
