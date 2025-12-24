@@ -101,7 +101,7 @@ final class DisplayRedrawDriver {
 }
 
 struct ContentView: View {
-    let numberOfMountains = 10
+    let numberOfMountains = 20
     @State private var maxPointsPerDepth = 5
     @State private var depth = 5
     @State private var driver: DisplayRedrawDriver?
@@ -145,13 +145,18 @@ struct ContentView: View {
                         )
                         .offset(
                             x: 0,
-                            y: (geo.size.height / Double(numberOfMountains)
-                                * bump(
+                            y: ((geo.size.height / Double(numberOfMountains) * Double(index)) + nearness(index: index) * CGFloat(100.0)) //initialzustand
+                            * (1.0 - bump( //sinuskurve
+                                CGFloat(index) / CGFloat(numberOfMountains)
+                            ))
+
+                            //+ nearness(index: index) * CGFloat(100.0)
+                               /* * bump(
                                     CGFloat(index) / CGFloat(numberOfMountains)
                                 )) //initialposition
-                                * Double(index)
                             + nearness(index: index) * CGFloat(100.0) * CGFloat((index - 5))
-                                //+ (animationValue * CGFloat((index - 5) * 100))  //todo: nicht 5 hardcodiert
+                                //+ (animationValue * CGFloat((index - 5) * 100))  //todo: nicht 5 hardcodiert*/
+                           // + nearness(index: index) * CGFloat(100.0)
                         )
 
                     }
