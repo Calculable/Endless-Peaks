@@ -106,6 +106,8 @@ struct ContentView: View {
     @State private var depth = 5
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
+    @State private var speed: CGFloat = 0.01
+
     let maxAnimationValue = CGFloat(1)
 
     var background: some View {
@@ -129,22 +131,23 @@ struct ContentView: View {
                     ForEach(Array(mountains.enumerated()), id: \.1.id) {
                         (index, mountain) in
 
+                        let nearness = nearness(index: index)
 
                         ZStack {
                             Color.blue
                             /*Color.black.opacity(
                                 CGFloat(index) / CGFloat(numberOfMountains)
                             )*/  // your 50% overlay base
-                            Color.black.opacity(nearness(index: index))
+                            Color.black.opacity(nearness)
                         }
                         .clipShape(Mountain(configuration: mountain))
                         .scaleEffect(
-                            CGFloat(1) + (nearness(index: index) / 10.0),
+                            CGFloat(1) + (nearness)*1.5,
                             anchor: .top
                         )
                         .offset(
                             x: 0,
-                            y: ((geo.size.height * nearness(index: index))) //initialzustand
+                            y: ((geo.size.height * nearness * nearness * nearness) ) //initialzustand
                             /** (1.0 - bump( //sinuskurve
                                 CGFloat(index) / CGFloat(numberOfMountains)
                             ))*/
@@ -188,6 +191,15 @@ struct ContentView: View {
                     in: 1...7,
                     step: 1
                 )
+
+                Slider(
+                    value: Binding(
+                        get: { speed },
+                        set: { speed = $0 }
+                    ),
+                    in: 0.01...1.0,
+                    step: 0.01
+                )
             }.padding()
         }
         .onAppear {
@@ -196,7 +208,7 @@ struct ContentView: View {
                 // Called once per refresh (main actor)
                 // e.g. update @State, run simulation step, etc.
                 // print(t)
-                animationValue += 0.1
+                animationValue += speed
                 if animationValue >= maxAnimationValue {
                     animationValue = 0
                     let mountain = MountainConfiguration(
