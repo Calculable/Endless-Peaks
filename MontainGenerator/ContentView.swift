@@ -101,14 +101,14 @@ final class DisplayRedrawDriver {
 }
 
 struct ContentView: View {
-    let numberOfMountains = 20
+    let numberOfMountains = 10
     @State private var maxPointsPerDepth = 3
     @State private var depth = 2
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
     @State private var speed: CGFloat = 0.02
 
-    let backgroundColor = Color.yellow
+    let backgroundColor = Color.random()
 
     let maxAnimationValue = CGFloat(1)
 
