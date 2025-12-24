@@ -106,6 +106,7 @@ struct ContentView: View {
     @State private var depth = 5
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
+    let maxAnimationValue = CGFloat(1)
 
     var background: some View {
         Rectangle()
@@ -131,12 +132,10 @@ struct ContentView: View {
 
                         ZStack {
                             Color.blue
-                            Color.black.opacity(
-                                CGFloat(index) / CGFloat(numberOfMountains)
-                            )  // your 50% overlay base
                             /*Color.black.opacity(
-                                (nearness(index: index) / 1.0)
-                                    / CGFloat(numberOfMountains)*/
+                                CGFloat(index) / CGFloat(numberOfMountains)
+                            )*/  // your 50% overlay base
+                            Color.black.opacity(nearness(index: index))
                         }
                         .clipShape(Mountain(configuration: mountain))
                         .scaleEffect(
@@ -145,10 +144,10 @@ struct ContentView: View {
                         )
                         .offset(
                             x: 0,
-                            y: ((geo.size.height / Double(numberOfMountains) * Double(index)) + nearness(index: index) * CGFloat(100.0)) //initialzustand
-                            * (1.0 - bump( //sinuskurve
+                            y: ((geo.size.height * nearness(index: index))) //initialzustand
+                            /** (1.0 - bump( //sinuskurve
                                 CGFloat(index) / CGFloat(numberOfMountains)
-                            ))
+                            ))*/
 
                             //+ nearness(index: index) * CGFloat(100.0)
                                /* * bump(
@@ -161,7 +160,9 @@ struct ContentView: View {
 
                     }
 
-                    Text("nearness: \(nearness(index: 1))")
+
+
+                    Text("nearness: \(nearness(index: 19))")
                         .foregroundStyle(.white)
 
                 }
@@ -195,7 +196,16 @@ struct ContentView: View {
                 // Called once per refresh (main actor)
                 // e.g. update @State, run simulation step, etc.
                 // print(t)
-                animationValue += 0.001
+                animationValue += 0.1
+                if animationValue >= maxAnimationValue {
+                    animationValue = 0
+                    let mountain = MountainConfiguration(
+                        maxPointsPerDepth: maxPointsPerDepth,
+                        depth: depth
+                    )
+                    mountains.insert(mountain, at: 0) //könnte effizienter sein, wenn ich hinten anhänge
+                    mountains.removeLast()
+                }
             }
             driver?.start()
         }
@@ -211,10 +221,18 @@ struct ContentView: View {
     }
 
     func nearness(index: Int) -> CGFloat {
+        //von 0 bis 1
+
+        let index = CGFloat(index)
+        let animationValue = CGFloat(animationValue)
+        let numberOfMountains = CGFloat(numberOfMountains)
+
+        return ((index + (((animationValue.truncatingRemainder(dividingBy: maxAnimationValue))/maxAnimationValue))) / numberOfMountains)
+        //
+
+       // 19 +
 
 
-
-        return CGFloat(index) * animationValue
     }
 
     func regenerateMountains() {
