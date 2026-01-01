@@ -26,31 +26,36 @@ private extension View {
     }
 }
 
+@Observable
+class MountainsConfiguration {
+    var numberOfMountains = 10
+    var maxPointsPerDepth = 3
+    var depth = 2
+    var speed: CGFloat = 0.01
+    var zoomEffect2: CGFloat = 1.5
+    var zoomEffect: CGFloat = 1.0
+    var offsetEffect: CGFloat = 3
+    var offsetEffect2: CGFloat = 1
+    var backgroundColor1 = Color.random()
+    var backgroundColor2 = Color.random()
+    var backgroundColor3 = Color.white
+    var foregroundColor = Color.black
+
+
+}
+
 struct ContentView: View {
-    @State private var numberOfMountains = 10
-    @State private var maxPointsPerDepth = 3
-    @State private var depth = 2
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
-    @State private var speed: CGFloat = 0.01
-    @State private var zoomEffect2: CGFloat = 1.5
-    @State private var zoomEffect: CGFloat = 1.0
-
-    @State private var offsetEffect: CGFloat = 3
-    @State private var offsetEffect2: CGFloat = 1
-
     @State private var aspectRatio: CGFloat = 1
-
-    @State private var backgroundColor1 = Color.random()
-    @State private var backgroundColor2 = Color.random()
-    @State private var backgroundColor3 = Color.white
-    @State private var foregroundColor = Color.black
+    @State var configuration = MountainsConfiguration()
+    @State private var mountains = [MountainConfiguration]()
 
     var backgroundGradient: Gradient {
         Gradient(stops: [
-            .init(color: backgroundColor1, location: 0),
-            .init(color: backgroundColor2, location: 0.5),
-            .init(color: backgroundColor3, location: 1.0),
+            .init(color: configuration.backgroundColor1, location: 0),
+            .init(color: configuration.backgroundColor2, location: 0.5),
+            .init(color: configuration.backgroundColor3, location: 1.0),
 
         ])
     }
@@ -77,23 +82,21 @@ struct ContentView: View {
                     /*Color.black.opacity(
                         CGFloat(index) / CGFloat(numberOfMountains)
                     )*/ // your 50% overlay base
-                    foregroundColor.opacity(nearness*nearness)
+                    configuration.foregroundColor.opacity(nearness*nearness)
                 }
                 .clipShape(Mountain(configuration: mountain))
                 .scaleEffect(
-                    CGFloat(1) + pow(nearness, zoomEffect) * zoomEffect2,
+                    CGFloat(1) + pow(nearness, configuration.zoomEffect) * configuration.zoomEffect2,
                     anchor: .top
                 )
                 .offset(
                     x: 0,
-                    y: geo.size.height * pow(nearness, offsetEffect) * offsetEffect2
+                    y: geo.size.height * pow(nearness, configuration.offsetEffect) * configuration.offsetEffect2
                 )
 
             }
         }
     }
-
-    @State private var mountains = [MountainConfiguration]()
 
     var body: some View {
         VStack {
@@ -117,42 +120,42 @@ struct ContentView: View {
                 HStack {
                     Slider(
                         value: Binding(
-                            get: { Double(numberOfMountains) },
-                            set: { numberOfMountains = Int($0.rounded()) }
+                            get: { Double(configuration.numberOfMountains) },
+                            set: { configuration.numberOfMountains = Int($0.rounded()) }
                         ),
                         in: 1...30,
                         step: 1
                     )
 
-                    Text("numberOfMountains: \(numberOfMountains)")
+                    Text("numberOfMountains: \(configuration.numberOfMountains)")
 
                 }
 
                 HStack {
                     Slider(
                         value: Binding(
-                            get: { Double(maxPointsPerDepth) },
-                            set: { maxPointsPerDepth = Int($0.rounded()) }
+                            get: { Double(configuration.maxPointsPerDepth) },
+                            set: { configuration.maxPointsPerDepth = Int($0.rounded()) }
                         ),
                         in: 1...10,
                         step: 1
                     )
 
-                    Text("maxPointsPerDepth: \(maxPointsPerDepth)")
+                    Text("maxPointsPerDepth: \(configuration.maxPointsPerDepth)")
 
                 }
 
                 HStack {
                     Slider(
                         value: Binding(
-                            get: { Double(depth) },
-                            set: { depth = Int($0.rounded()) }
+                            get: { Double(configuration.depth) },
+                            set: { configuration.depth = Int($0.rounded()) }
                         ),
                         in: 1...7,
                         step: 1
                     )
 
-                    Text("depth: \(depth)")
+                    Text("depth: \(configuration.depth)")
 
 
                 }
@@ -161,14 +164,14 @@ struct ContentView: View {
 
                     Slider(
                         value: Binding(
-                            get: { speed },
-                            set: { speed = $0 }
+                            get: { configuration.speed },
+                            set: { configuration.speed = $0 }
                         ),
                         in: 0.01...1.0,
                         step: 0.01
                     )
 
-                    Text("speed: \(speed)")
+                    Text("speed: \(configuration.speed)")
 
 
                 }
@@ -177,14 +180,14 @@ struct ContentView: View {
 
                     Slider(
                         value: Binding(
-                            get: { zoomEffect },
-                            set: { zoomEffect = $0 }
+                            get: { configuration.zoomEffect },
+                            set: { configuration.zoomEffect = $0 }
                         ),
                         in: 0.01...100,
                         step: 0.01
                     )
 
-                    Text("zoomEffect: \(zoomEffect)")
+                    Text("zoomEffect: \(configuration.zoomEffect)")
 
 
                 }
@@ -193,14 +196,14 @@ struct ContentView: View {
 
                     Slider(
                         value: Binding(
-                            get: { zoomEffect2 },
-                            set: { zoomEffect2 = $0 }
+                            get: { configuration.zoomEffect2 },
+                            set: { configuration.zoomEffect2 = $0 }
                         ),
                         in: 0.01...100,
                         step: 0.01
                     )
 
-                    Text("zoomEffect2: \(zoomEffect2)")
+                    Text("zoomEffect2: \(configuration.zoomEffect2)")
 
 
                 }
@@ -209,14 +212,14 @@ struct ContentView: View {
 
                     Slider(
                         value: Binding(
-                            get: { offsetEffect },
-                            set: { offsetEffect = $0 }
+                            get: { configuration.offsetEffect },
+                            set: { configuration.offsetEffect = $0 }
                         ),
                         in: 0.01...100,
                         step: 0.01
                     )
 
-                    Text("offsetEffect: \(offsetEffect)")
+                    Text("offsetEffect: \(configuration.offsetEffect)")
 
 
                 }
@@ -225,21 +228,21 @@ struct ContentView: View {
 
                     Slider(
                         value: Binding(
-                            get: { offsetEffect2 },
-                            set: { offsetEffect2 = $0 }
+                            get: { configuration.offsetEffect2 },
+                            set: { configuration.offsetEffect2 = $0 }
                         ),
                         in: 0.01...100,
                         step: 0.01
                     )
 
-                    Text("offsetEffect2: \(offsetEffect2)")
+                    Text("offsetEffect2: \(configuration.offsetEffect2)")
 
 
                 }
 
-                ColorPicker("Background Color 1", selection: $backgroundColor1)
-                ColorPicker("Background Color 2", selection: $backgroundColor2)
-                ColorPicker("Background Color 3", selection: $backgroundColor3)
+                ColorPicker("Background Color 1", selection: $configuration.backgroundColor1)
+                ColorPicker("Background Color 2", selection: $configuration.backgroundColor2)
+                ColorPicker("Background Color 3", selection: $configuration.backgroundColor3)
 
             }.padding()
         }
@@ -250,12 +253,12 @@ struct ContentView: View {
                 // e.g. update @State, run simulation step, etc.
                 // print(t)
                 print(aspectRatio)
-                animationValue += speed
+                animationValue += self.configuration.speed
                 if animationValue >= maxAnimationValue {
                     animationValue = 0
                     let mountain = MountainConfiguration(
-                        maxPointsPerDepth: max(1, maxPointsPerDepth*Int(aspectRatio)),
-                        depth: depth
+                        maxPointsPerDepth: max(1, configuration.maxPointsPerDepth*Int(aspectRatio)),
+                        depth: configuration.depth
                     )
                     mountains.insert(mountain, at: 0)  //könnte effizienter sein, wenn ich hinten anhänge
                     mountains.removeLast()
@@ -266,13 +269,13 @@ struct ContentView: View {
         .onDisappear {
             driver?.stop()
         }
-        .onChange(of: maxPointsPerDepth) {
+        .onChange(of: self.configuration.maxPointsPerDepth) {
             regenerateMountains()
         }
-        .onChange(of: depth) {
+        .onChange(of: self.configuration.depth) {
             regenerateMountains()
         }
-        .onChange(of: numberOfMountains) {
+        .onChange(of: self.configuration.numberOfMountains) {
             regenerateMountains()
         }
     }
@@ -282,7 +285,7 @@ struct ContentView: View {
 
         let index = CGFloat(index)
         let animationValue = CGFloat(animationValue)
-        let numberOfMountains = CGFloat(numberOfMountains)
+        let numberOfMountains = CGFloat(configuration.numberOfMountains)
 
         return
             ((index
@@ -300,10 +303,10 @@ struct ContentView: View {
         animationValue = 0
         mountains.removeAll()
 
-        for _ in 0..<numberOfMountains {
+        for _ in 0..<configuration.numberOfMountains {
             let mountain = MountainConfiguration(
-                maxPointsPerDepth: maxPointsPerDepth,
-                depth: depth
+                maxPointsPerDepth: configuration.maxPointsPerDepth,
+                depth: configuration.depth
             )
             mountains.append(mountain)
         }
