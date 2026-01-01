@@ -27,18 +27,33 @@ private extension View {
 }
 
 struct ContentView: View {
-    let numberOfMountains = 10
+    @State private var numberOfMountains = 10
     @State private var maxPointsPerDepth = 3
     @State private var depth = 2
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
     @State private var speed: CGFloat = 0.01
-    @State private var zoomEffect: CGFloat = 1.5
+    @State private var zoomEffect2: CGFloat = 1.5
+    @State private var zoomEffect: CGFloat = 1.0
+
     @State private var offsetEffect: CGFloat = 3
+    @State private var offsetEffect2: CGFloat = 1
+
     @State private var aspectRatio: CGFloat = 1
 
-    let backgroundColor = Color.random()
-    let foregroundColor = Color.random()
+    @State private var backgroundColor1 = Color.random()
+    @State private var backgroundColor2 = Color.random()
+    @State private var backgroundColor3 = Color.white
+    @State private var foregroundColor = Color.black
+
+    var backgroundGradient: Gradient {
+        Gradient(stops: [
+            .init(color: backgroundColor1, location: 0),
+            .init(color: backgroundColor2, location: 0.5),
+            .init(color: backgroundColor3, location: 1.0),
+
+        ])
+    }
 
     let maxAnimationValue = CGFloat(1)
 
@@ -46,10 +61,7 @@ struct ContentView: View {
         
         Rectangle()
             .fill(
-                Gradient(stops: [
-                    .init(color: backgroundColor, location: 0),
-                    .init(color: Color.white, location: 0.5),
-                ])
+                backgroundGradient
             )
     }
 
@@ -69,12 +81,12 @@ struct ContentView: View {
                 }
                 .clipShape(Mountain(configuration: mountain))
                 .scaleEffect(
-                    CGFloat(1) + (nearness) * zoomEffect,
+                    CGFloat(1) + pow(nearness, zoomEffect) * zoomEffect2,
                     anchor: .top
                 )
                 .offset(
                     x: 0,
-                    y: geo.size.height * pow(nearness, offsetEffect)
+                    y: geo.size.height * pow(nearness, offsetEffect) * offsetEffect2
                 )
 
             }
@@ -97,10 +109,24 @@ struct ContentView: View {
                     aspectRatio = newSize.width / max(newSize.height, 1)
                 }
 
-            }
+            }.clipped()
 
 
             VStack {
+
+                HStack {
+                    Slider(
+                        value: Binding(
+                            get: { Double(numberOfMountains) },
+                            set: { numberOfMountains = Int($0.rounded()) }
+                        ),
+                        in: 1...30,
+                        step: 1
+                    )
+
+                    Text("numberOfMountains: \(numberOfMountains)")
+
+                }
 
                 HStack {
                     Slider(
@@ -154,7 +180,7 @@ struct ContentView: View {
                             get: { zoomEffect },
                             set: { zoomEffect = $0 }
                         ),
-                        in: 0.01...10,
+                        in: 0.01...100,
                         step: 0.01
                     )
 
@@ -167,10 +193,26 @@ struct ContentView: View {
 
                     Slider(
                         value: Binding(
+                            get: { zoomEffect2 },
+                            set: { zoomEffect2 = $0 }
+                        ),
+                        in: 0.01...100,
+                        step: 0.01
+                    )
+
+                    Text("zoomEffect2: \(zoomEffect2)")
+
+
+                }
+
+                HStack {
+
+                    Slider(
+                        value: Binding(
                             get: { offsetEffect },
                             set: { offsetEffect = $0 }
                         ),
-                        in: 0.01...10,
+                        in: 0.01...100,
                         step: 0.01
                     )
 
@@ -178,6 +220,27 @@ struct ContentView: View {
 
 
                 }
+
+                HStack {
+
+                    Slider(
+                        value: Binding(
+                            get: { offsetEffect2 },
+                            set: { offsetEffect2 = $0 }
+                        ),
+                        in: 0.01...100,
+                        step: 0.01
+                    )
+
+                    Text("offsetEffect2: \(offsetEffect2)")
+
+
+                }
+
+                ColorPicker("Background Color 1", selection: $backgroundColor1)
+                ColorPicker("Background Color 2", selection: $backgroundColor2)
+                ColorPicker("Background Color 3", selection: $backgroundColor3)
+
             }.padding()
         }
         .onAppear {
@@ -207,6 +270,9 @@ struct ContentView: View {
             regenerateMountains()
         }
         .onChange(of: depth) {
+            regenerateMountains()
+        }
+        .onChange(of: numberOfMountains) {
             regenerateMountains()
         }
     }
