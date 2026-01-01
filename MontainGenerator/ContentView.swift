@@ -37,13 +37,13 @@ struct ContentView: View {
     @State private var offsetEffect: CGFloat = 3
     @State private var aspectRatio: CGFloat = 1
 
-
-
     let backgroundColor = Color.random()
+    let foregroundColor = Color.random()
 
     let maxAnimationValue = CGFloat(1)
 
     var background: some View {
+        
         Rectangle()
             .fill(
                 Gradient(stops: [
@@ -61,17 +61,11 @@ struct ContentView: View {
                 let nearness = nearness(index: index)
 
                 ZStack {
-                    Rectangle()
-                        .fill(
-                            Gradient(stops: [
-                                .init(color: backgroundColor, location: 0),
-                                .init(color: Color.white, location: 0.5),
-                            ])
-                        )
+                    background
                     /*Color.black.opacity(
                         CGFloat(index) / CGFloat(numberOfMountains)
                     )*/ // your 50% overlay base
-                    Color.black.opacity(nearness*nearness)
+                    foregroundColor.opacity(nearness*nearness)
                 }
                 .clipShape(Mountain(configuration: mountain))
                 .scaleEffect(
@@ -106,35 +100,85 @@ struct ContentView: View {
             }
 
 
-            /*VStack {
-            
-                Slider(
-                    value: Binding(
-                        get: { Double(maxPointsPerDepth) },
-                        set: { maxPointsPerDepth = Int($0.rounded()) }
-                    ),
-                    in: 1...10,
-                    step: 1
-                )
-            
-                Slider(
-                    value: Binding(
-                        get: { Double(depth) },
-                        set: { depth = Int($0.rounded()) }
-                    ),
-                    in: 1...7,
-                    step: 1
-                )
-            
-                Slider(
-                    value: Binding(
-                        get: { speed },
-                        set: { speed = $0 }
-                    ),
-                    in: 0.01...1.0,
-                    step: 0.01
-                )
-            }.padding()*/
+            VStack {
+
+                HStack {
+                    Slider(
+                        value: Binding(
+                            get: { Double(maxPointsPerDepth) },
+                            set: { maxPointsPerDepth = Int($0.rounded()) }
+                        ),
+                        in: 1...10,
+                        step: 1
+                    )
+
+                    Text("maxPointsPerDepth: \(maxPointsPerDepth)")
+
+                }
+
+                HStack {
+                    Slider(
+                        value: Binding(
+                            get: { Double(depth) },
+                            set: { depth = Int($0.rounded()) }
+                        ),
+                        in: 1...7,
+                        step: 1
+                    )
+
+                    Text("depth: \(depth)")
+
+
+                }
+
+                HStack {
+
+                    Slider(
+                        value: Binding(
+                            get: { speed },
+                            set: { speed = $0 }
+                        ),
+                        in: 0.01...1.0,
+                        step: 0.01
+                    )
+
+                    Text("speed: \(speed)")
+
+
+                }
+
+                HStack {
+
+                    Slider(
+                        value: Binding(
+                            get: { zoomEffect },
+                            set: { zoomEffect = $0 }
+                        ),
+                        in: 0.01...10,
+                        step: 0.01
+                    )
+
+                    Text("zoomEffect: \(zoomEffect)")
+
+
+                }
+
+                HStack {
+
+                    Slider(
+                        value: Binding(
+                            get: { offsetEffect },
+                            set: { offsetEffect = $0 }
+                        ),
+                        in: 0.01...10,
+                        step: 0.01
+                    )
+
+                    Text("offsetEffect: \(offsetEffect)")
+
+
+                }
+            }.padding()
         }
         .onAppear {
             regenerateMountains()
