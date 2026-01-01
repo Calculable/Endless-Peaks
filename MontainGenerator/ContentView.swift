@@ -8,96 +8,22 @@
 import Foundation
 import SwiftUI
 
-#if os(iOS) || os(tvOS) || os(visionOS)
-    import QuartzCore
-#elseif os(macOS)
-    import CoreVideo
-#endif
-
-/// Calls `onFrame` once per display refresh.
-/// - On iOS: CADisplayLink (main thread)
-/// - On macOS: CVDisplayLink (realtime background thread; we hop to main)
-final class DisplayRedrawDriver {
-    typealias FrameCallback =
-        @MainActor (_ timestampSeconds: TimeInterval) -> Void
-
-    private let onFrame: FrameCallback
-
-    #if os(iOS) || os(tvOS) || os(visionOS)
-        private var displayLink: CADisplayLink?
-    #elseif os(macOS)
-        private var displayLink: CVDisplayLink?
-    #endif
-
-    init(onFrame: @escaping FrameCallback) {
-        self.onFrame = onFrame
+private struct SizeKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
     }
+}
 
-    func start() {
-        #if os(iOS) || os(tvOS) || os(visionOS)
-            stop()
-            let link = CADisplayLink(
-                target: self,
-                selector: #selector(tick(_:))
-            )
-            // Let the system run at the native refresh rate (60/120/etc).
-            // If you *want* to request up to 120 on capable devices, uncomment:
-            // link.preferredFrameRateRange = .init(minimum: 30, maximum: 120, preferred: 120)
-            link.add(to: .main, forMode: .common)
-            displayLink = link
-
-        #elseif os(macOS)
-            stop()
-            var link: CVDisplayLink?
-            CVDisplayLinkCreateWithActiveCGDisplays(&link)
-            displayLink = link
-            guard let displayLink else { return }
-
-            CVDisplayLinkSetOutputCallback(
-                displayLink,
-                { _, _, outTime, _, _, userInfo -> CVReturn in
-                    let me = Unmanaged<DisplayRedrawDriver>.fromOpaque(
-                        userInfo!
-                    ).takeUnretainedValue()
-
-                    let ts = outTime.pointee
-                    let seconds =
-                        (Double(ts.videoTime) / Double(ts.videoTimeScale))
-
-                    // CVDisplayLink is NOT on the main thread -> hop to main.
-                    Task { @MainActor in
-                        me.onFrame(seconds)
-                    }
-                    return kCVReturnSuccess
-                },
-                Unmanaged.passUnretained(self).toOpaque()
-            )
-
-            CVDisplayLinkStart(displayLink)
-        #endif
-    }
-
-    func stop() {
-        #if os(iOS) || os(tvOS) || os(visionOS)
-            displayLink?.invalidate()
-            displayLink = nil
-        #elseif os(macOS)
-            if let displayLink {
-                CVDisplayLinkStop(displayLink)
+private extension View {
+    func readSize(_ onChange: @escaping (CGSize) -> Void) -> some View {
+        background(
+            GeometryReader { geo in
+                Color.clear.preference(key: SizeKey.self, value: geo.size)
             }
-            displayLink = nil
-        #endif
+        )
+        .onPreferenceChange(SizeKey.self, perform: onChange)
     }
-
-    deinit { stop() }
-
-    #if os(iOS) || os(tvOS) || os(visionOS)
-        @objc private func tick(_ link: CADisplayLink) {
-            Task { @MainActor in
-                onFrame(link.timestamp)
-            }
-        }
-    #endif
 }
 
 struct ContentView: View {
@@ -106,7 +32,12 @@ struct ContentView: View {
     @State private var depth = 2
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
-    @State private var speed: CGFloat = 0.02
+    @State private var speed: CGFloat = 0.01
+    @State private var zoomEffect: CGFloat = 1.5
+    @State private var offsetEffect: CGFloat = 3
+    @State private var aspectRatio: CGFloat = 1
+
+
 
     let backgroundColor = Color.random()
 
@@ -140,24 +71,16 @@ struct ContentView: View {
                     /*Color.black.opacity(
                         CGFloat(index) / CGFloat(numberOfMountains)
                     )*/ // your 50% overlay base
-                    Color.black.opacity(nearness)
+                    Color.black.opacity(nearness*nearness)
                 }
                 .clipShape(Mountain(configuration: mountain))
                 .scaleEffect(
-                    CGFloat(1) + (nearness) * 1.5,
+                    CGFloat(1) + (nearness) * zoomEffect,
                     anchor: .top
                 )
                 .offset(
                     x: 0,
-                    y: ((geo.size.height * nearness * nearness * nearness))  //initialzustand
-
-                        //+ nearness(index: index) * CGFloat(100.0)
-                        /* * bump(
-                            CGFloat(index) / CGFloat(numberOfMountains)
-                        )) //initialposition
-                    + nearness(index: index) * CGFloat(100.0) * CGFloat((index - 5))
-                        //+ (animationValue * CGFloat((index - 5) * 100))  //todo: nicht 5 hardcodiert*/
-                    // + nearness(index: index) * CGFloat(100.0)
+                    y: geo.size.height * pow(nearness, offsetEffect)
                 )
 
             }
@@ -176,9 +99,12 @@ struct ContentView: View {
                     mountainsView
 
 
+                }.onChange(of: geo.size) { _, newSize in
+                    aspectRatio = newSize.width / max(newSize.height, 1)
                 }
 
             }
+
 
             /*VStack {
             
@@ -216,11 +142,12 @@ struct ContentView: View {
                 // Called once per refresh (main actor)
                 // e.g. update @State, run simulation step, etc.
                 // print(t)
+                print(aspectRatio)
                 animationValue += speed
                 if animationValue >= maxAnimationValue {
                     animationValue = 0
                     let mountain = MountainConfiguration(
-                        maxPointsPerDepth: maxPointsPerDepth,
+                        maxPointsPerDepth: max(1, maxPointsPerDepth*Int(aspectRatio)),
                         depth: depth
                     )
                     mountains.insert(mountain, at: 0)  //könnte effizienter sein, wenn ich hinten anhänge
@@ -286,60 +213,7 @@ struct ContentView: View {
     typealias PlatformColor = NSColor
 #endif
 
-extension Color {
 
-    /// Returns a lighter version of this color, where `step == total` becomes white (or very close).
-    /// Works on both UIKit and AppKit.
-    func lighter(step: Int, total: Int) -> Color {
-        let t = CGFloat(max(0, min(step, total))) / CGFloat(max(total, 1))
-
-        #if canImport(UIKit)
-            let pc = PlatformColor(self)
-
-            var h: CGFloat = 0
-            var s: CGFloat = 0
-            var b: CGFloat = 0
-            var a: CGFloat = 0
-            guard pc.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-            else { return self }
-
-            let newS = max(0, s * (1 - t))  // fade saturation to 0 (white)
-            let newB = b + (1 - b) * t  // lift brightness to 1
-
-            return Color(
-                PlatformColor(
-                    hue: h,
-                    saturation: newS,
-                    brightness: newB,
-                    alpha: a
-                )
-            )
-
-        #elseif canImport(AppKit)
-            // NSColor needs to be in an RGB-compatible space before extracting HSB.
-            guard let rgb = PlatformColor(self).usingColorSpace(.deviceRGB)
-            else { return self }
-
-            var h: CGFloat = 0
-            var s: CGFloat = 0
-            var b: CGFloat = 0
-            var a: CGFloat = 0
-            rgb.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-
-            let newS = max(0, s * (1 - t))
-            let newB = b + (1 - b) * t
-
-            return Color(
-                PlatformColor(
-                    calibratedHue: h,
-                    saturation: newS,
-                    brightness: newB,
-                    alpha: a
-                )
-            )
-        #endif
-    }
-}
 extension Color {
 
     public static func random(randomOpacity: Bool = false) -> Color {
@@ -470,18 +344,50 @@ struct MountainConfiguration: Identifiable {
 // MARK: - Dumb Shape
 struct Mountain: Shape {
     let configuration: MountainConfiguration
+    let rounded: Bool
+
+    init(configuration: MountainConfiguration, rounded: Bool = false) {
+        self.configuration = configuration
+        self.rounded = rounded
+    }
 
     func path(in rect: CGRect) -> Path {
         let ridge = configuration.ridgePoints(in: rect)
-        guard let first = ridge.first else { return Path() }
+        guard ridge.count > 1 else { return Path() }
 
         var path = Path()
-        path.move(to: first)
-        for p in ridge.dropFirst() { path.addLine(to: p) }
+        path.move(to: ridge[0])
+
+        if rounded {
+            for i in 1..<ridge.count {
+                let previous = ridge[i - 1]
+                let current = ridge[i]
+
+                let midPoint = CGPoint(
+                    x: (previous.x + current.x) / 2,
+                    y: (previous.y + current.y) / 2
+                )
+
+                path.addQuadCurve(
+                    to: midPoint,
+                    control: previous
+                )
+            }
+
+            // Finish final segment
+            if let last = ridge.last {
+                path.addLine(to: last)
+            }
+        } else {
+            for point in ridge.dropFirst() {
+                path.addLine(to: point)
+            }
+        }
 
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         path.closeSubpath()
+
         return path
     }
 }
