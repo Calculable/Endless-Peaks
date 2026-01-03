@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  MontainGenerator
-//
-//  Created by Jan Huber on 15.12.2025.
-//
-
 import Foundation
 import SwiftUI
 
@@ -15,8 +8,10 @@ private struct SizeKey: PreferenceKey {
     }
 }
 
-private extension View {
-    func readSize(_ onChange: @escaping (CGSize) -> Void) -> some View {
+extension View {
+    fileprivate func readSize(_ onChange: @escaping (CGSize) -> Void)
+        -> some View
+    {
         background(
             GeometryReader { geo in
                 Color.clear.preference(key: SizeKey.self, value: geo.size)
@@ -40,8 +35,16 @@ class MountainsConfiguration {
     var backgroundColor2 = Color.random()
     var backgroundColor3 = Color.white
     var foregroundColor = Color.black
+    var rounded: Bool = true
 
+    var backgroundGradient: Gradient {
+        Gradient(stops: [
+            .init(color: backgroundColor1, location: 0),
+            .init(color: backgroundColor2, location: 0.5),
+            .init(color: backgroundColor3, location: 1.0),
 
+        ])
+    }
 }
 
 struct ContentView: View {
@@ -50,23 +53,12 @@ struct ContentView: View {
     @State private var aspectRatio: CGFloat = 1
     @State var configuration = MountainsConfiguration()
     @State private var mountains = [MountainConfiguration]()
-
-    var backgroundGradient: Gradient {
-        Gradient(stops: [
-            .init(color: configuration.backgroundColor1, location: 0),
-            .init(color: configuration.backgroundColor2, location: 0.5),
-            .init(color: configuration.backgroundColor3, location: 1.0),
-
-        ])
-    }
-
-    let maxAnimationValue = CGFloat(1)
+    private let maxAnimationValue = CGFloat(1)
 
     var background: some View {
-        
         Rectangle()
             .fill(
-                backgroundGradient
+                configuration.backgroundGradient
             )
     }
 
@@ -79,19 +71,24 @@ struct ContentView: View {
 
                 ZStack {
                     background
-                    /*Color.black.opacity(
-                        CGFloat(index) / CGFloat(numberOfMountains)
-                    )*/ // your 50% overlay base
-                    configuration.foregroundColor.opacity(nearness*nearness)
+                    configuration.foregroundColor.opacity(nearness * nearness)
                 }
-                .clipShape(Mountain(configuration: mountain))
+                .clipShape(
+                    Mountain(
+                        configuration: mountain,
+                        rounded: configuration.rounded
+                    )
+                )
                 .scaleEffect(
-                    CGFloat(1) + pow(nearness, configuration.zoomEffect) * configuration.zoomEffect2,
+                    CGFloat(1) + pow(nearness, configuration.zoomEffect)
+                        * configuration.zoomEffect2,
                     anchor: .top
                 )
                 .offset(
                     x: 0,
-                    y: geo.size.height * pow(nearness, configuration.offsetEffect) * configuration.offsetEffect2
+                    y: geo.size.height
+                        * pow(nearness, configuration.offsetEffect)
+                        * configuration.offsetEffect2
                 )
 
             }
@@ -102,32 +99,32 @@ struct ContentView: View {
         VStack {
             GeometryReader { geo in
 
-            ZStack {
+                ZStack {
                     background
-
                     mountainsView
-
-
                 }.onChange(of: geo.size) { _, newSize in
                     aspectRatio = newSize.width / max(newSize.height, 1)
                 }
-
             }.clipped()
 
-
             VStack {
-
                 HStack {
                     Slider(
                         value: Binding(
                             get: { Double(configuration.numberOfMountains) },
-                            set: { configuration.numberOfMountains = Int($0.rounded()) }
+                            set: {
+                                configuration.numberOfMountains = Int(
+                                    $0.rounded()
+                                )
+                            }
                         ),
                         in: 1...30,
                         step: 1
                     )
 
-                    Text("numberOfMountains: \(configuration.numberOfMountains)")
+                    Text(
+                        "numberOfMountains: \(configuration.numberOfMountains)"
+                    )
 
                 }
 
@@ -135,13 +132,19 @@ struct ContentView: View {
                     Slider(
                         value: Binding(
                             get: { Double(configuration.maxPointsPerDepth) },
-                            set: { configuration.maxPointsPerDepth = Int($0.rounded()) }
+                            set: {
+                                configuration.maxPointsPerDepth = Int(
+                                    $0.rounded()
+                                )
+                            }
                         ),
                         in: 1...10,
                         step: 1
                     )
 
-                    Text("maxPointsPerDepth: \(configuration.maxPointsPerDepth)")
+                    Text(
+                        "maxPointsPerDepth: \(configuration.maxPointsPerDepth)"
+                    )
 
                 }
 
@@ -156,7 +159,6 @@ struct ContentView: View {
                     )
 
                     Text("depth: \(configuration.depth)")
-
 
                 }
 
@@ -173,7 +175,6 @@ struct ContentView: View {
 
                     Text("speed: \(configuration.speed)")
 
-
                 }
 
                 HStack {
@@ -188,7 +189,6 @@ struct ContentView: View {
                     )
 
                     Text("zoomEffect: \(configuration.zoomEffect)")
-
 
                 }
 
@@ -205,7 +205,6 @@ struct ContentView: View {
 
                     Text("zoomEffect2: \(configuration.zoomEffect2)")
 
-
                 }
 
                 HStack {
@@ -220,7 +219,6 @@ struct ContentView: View {
                     )
 
                     Text("offsetEffect: \(configuration.offsetEffect)")
-
 
                 }
 
@@ -237,30 +235,39 @@ struct ContentView: View {
 
                     Text("offsetEffect2: \(configuration.offsetEffect2)")
 
-
                 }
 
-                ColorPicker("Background Color 1", selection: $configuration.backgroundColor1)
-                ColorPicker("Background Color 2", selection: $configuration.backgroundColor2)
-                ColorPicker("Background Color 3", selection: $configuration.backgroundColor3)
+                ColorPicker(
+                    "Background Color 1",
+                    selection: $configuration.backgroundColor1
+                )
+                ColorPicker(
+                    "Background Color 2",
+                    selection: $configuration.backgroundColor2
+                )
+                ColorPicker(
+                    "Background Color 3",
+                    selection: $configuration.backgroundColor3
+                )
+
+                Toggle("Rounded", isOn: $configuration.rounded)
 
             }.padding()
         }
         .onAppear {
             regenerateMountains()
             driver = DisplayRedrawDriver { t in
-                // Called once per refresh (main actor)
-                // e.g. update @State, run simulation step, etc.
-                // print(t)
-                print(aspectRatio)
                 animationValue += self.configuration.speed
                 if animationValue >= maxAnimationValue {
                     animationValue = 0
                     let mountain = MountainConfiguration(
-                        maxPointsPerDepth: max(1, configuration.maxPointsPerDepth*Int(aspectRatio)),
+                        maxPointsPerDepth: max(
+                            1,
+                            configuration.maxPointsPerDepth * Int(aspectRatio)
+                        ),
                         depth: configuration.depth
                     )
-                    mountains.insert(mountain, at: 0)  //könnte effizienter sein, wenn ich hinten anhänge
+                    mountains.insert(mountain, at: 0)
                     mountains.removeLast()
                 }
             }
@@ -292,14 +299,10 @@ struct ContentView: View {
             + (((animationValue.truncatingRemainder(
                 dividingBy: maxAnimationValue
             )) / maxAnimationValue))) / numberOfMountains)
-        //
-
-        // 19 +
 
     }
 
     func regenerateMountains() {
-
         animationValue = 0
         mountains.removeAll()
 
@@ -312,59 +315,14 @@ struct ContentView: View {
         }
 
     }
-
-    func bump(_ x: CGFloat) -> CGFloat {
-        CGFloat(sin(Double.pi * Double(x)))
-    }
 }
 
-#if canImport(UIKit)
-    import UIKit
-    typealias PlatformColor = UIColor
-#elseif canImport(AppKit)
-    import AppKit
-    typealias PlatformColor = NSColor
-#endif
-
-
-extension Color {
-
-    public static func random(randomOpacity: Bool = false) -> Color {
-        Color(
-            red: .random(in: 0...1),
-            green: .random(in: 0...1),
-            blue: .random(in: 0...1),
-            opacity: randomOpacity ? .random(in: 0...1) : 1
-        )
-    }
-}
-
-// MARK: - Seeded RNG (repeatable randomness)
-struct SeededGenerator: RandomNumberGenerator {
-    private var state: UInt64
-
-    init(seed: UInt64) {
-        self.state = seed != 0 ? seed : 0xDEAD_BEEF
-    }
-
-    mutating func next() -> UInt64 {
-        // SplitMix64
-        state &+= 0x9E37_79B9_7F4A_7C15
-        var z = state
-        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
-        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
-        return z ^ (z >> 31)
-    }
-}
-
-// MARK: - Configuration (precomputes once)
 struct MountainConfiguration: Identifiable {
     let maxPointsPerDepth: Int
     let depth: Int
     let seed: UInt64
     let id = UUID()
 
-    /// Stored ridge points in unit space (x,y in 0...1), left -> right.
     let ridgeUnitPoints: [CGPoint]
 
     init(maxPointsPerDepth: Int, depth: Int, seed: UInt64? = nil) {
@@ -374,7 +332,6 @@ struct MountainConfiguration: Identifiable {
         self.seed = seed
         var rng = SeededGenerator(seed: seed)
 
-        // Unit-space endpoints (x fixed, y random)
         let start = CGPoint(
             x: 0.0,
             y: CGFloat.random(in: 0.0...1.0, using: &rng)
@@ -390,7 +347,6 @@ struct MountainConfiguration: Identifiable {
         )
     }
 
-    /// Same points every time; just scaled into rect.
     func ridgePoints(in rect: CGRect) -> [CGPoint] {
         ridgeUnitPoints.map { p in
             CGPoint(
@@ -442,7 +398,6 @@ struct MountainConfiguration: Identifiable {
                 rng: &rng
             )
 
-            // stitch without duplicating points
             if i == 0 {
                 result.append(contentsOf: seg)
             } else {
@@ -454,7 +409,6 @@ struct MountainConfiguration: Identifiable {
     }
 }
 
-// MARK: - Dumb Shape
 struct Mountain: Shape {
     let configuration: MountainConfiguration
     let rounded: Bool
