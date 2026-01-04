@@ -82,7 +82,7 @@ class MountainsConfiguration {
 
 struct ContentView: View {
     var body: some View {
-        AnimationView()
+        FancyOptionPickerScreen()
     }
 }
 
@@ -146,7 +146,7 @@ struct AnimationView: View {
                 }
             }.clipped()
 
-            VStack {
+           /* VStack {
                 HStack {
                     Slider(
                         value: Binding(
@@ -295,7 +295,7 @@ struct AnimationView: View {
                     print("MountainsConfiguration(numberOfMountains: \(configuration.numberOfMountains), maxPointsPerDepth: \(configuration.maxPointsPerDepth), depth: \(configuration.depth), speed: \(configuration.speed), zoomEffect2: \(configuration.zoomEffect2), zoomEffect: \(configuration.zoomEffect), offsetEffect: \(configuration.offsetEffect), offsetEffect2: \(configuration.offsetEffect2), backgroundColor1: Color.init(hex: \"\(configuration.backgroundColor1.toHex()!)\"), backgroundColor2: Color.init(hex: \"\(configuration.backgroundColor2.toHex()!)\"), backgroundColor3: Color.init(hex: \"\(configuration.backgroundColor3.toHex()!)\"), foregroundColor: Color.black, rounded: \(configuration.rounded ? "true" : "false"))")
                 }
 
-            }.padding()
+            }.padding()*/
         }
         .onAppear {
             regenerateMountains()
