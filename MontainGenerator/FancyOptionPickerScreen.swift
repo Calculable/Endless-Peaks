@@ -30,6 +30,7 @@ struct OptionCard: Identifiable, Hashable {
 
 struct FancyOptionPickerScreen: View {
     @State private var selectedOption: OptionCard? = nil
+    @State private var navigateTo: OptionCard? = nil   // 👈 NEW
 
     private let options: [OptionCard] = [
         .init(
@@ -88,10 +89,8 @@ struct FancyOptionPickerScreen: View {
             configuration: .zhangjiajie,
             image: .zhangjiajieNationalForestPark
         ),
-
     ]
 
-    // Adaptive grid: changes column count based on available width
     private var gridItems: [GridItem] {
         [
             GridItem(
@@ -107,8 +106,9 @@ struct FancyOptionPickerScreen: View {
             VStack(spacing: 16) {
 
                 #if os(macOS)
-                    header
+                header
                 #endif
+
                 ScrollView {
                     LazyVGrid(columns: gridItems, spacing: 16) {
                         ForEach(options) { option in
@@ -116,6 +116,7 @@ struct FancyOptionPickerScreen: View {
                                 option: option,
                                 isSelected: selectedOption?.id == option.id
                             ) {
+                                // Selection animation
                                 withAnimation(
                                     .spring(
                                         response: 0.25,
@@ -124,6 +125,9 @@ struct FancyOptionPickerScreen: View {
                                 ) {
                                     selectedOption = option
                                 }
+
+                                // Immediate navigation
+                                navigateTo = option
                             }
                             .accessibilityLabel(
                                 "\(option.title). \(option.subtitle)"
@@ -137,30 +141,24 @@ struct FancyOptionPickerScreen: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
                 }
-                .safeAreaInset(edge: .bottom, alignment: .trailing) {
-                    footer
-                }
-
-                #if os(macOS)
-                    footer
-                        .padding(.horizontal, 20)
-
-                #else
-
-
-
-
-                #endif
-
             }
             #if os(macOS)
-                .padding(.vertical, 20)
+            .padding(.vertical, 20)
             #endif
             .background(background)
+
+#if os(macOS)
+            .navigationTitle("Mountain Generator")
+
+            #else
             .navigationTitle("Pick your animation")
-            #if os(iOS)
-                // .navigationBarTitleDisplayMode(.inline)
             #endif
+
+
+            .navigationDestination(item: $navigateTo) { option in
+                AnimationView(configuration: option.configuration)
+                    .ignoresSafeArea()
+            }
         }
     }
 
@@ -171,7 +169,7 @@ struct FancyOptionPickerScreen: View {
             Text("Pick your animation")
                 .font(.system(.largeTitle, design: .rounded).weight(.bold))
 
-            Text("Select one of the options below, then press Start.")
+            Text("Tap an option to start immediately.")
                 .font(.system(.body, design: .rounded))
                 .foregroundStyle(.secondary)
         }
@@ -179,86 +177,9 @@ struct FancyOptionPickerScreen: View {
         .padding(.horizontal, 20)
     }
 
-    private var footer: some View {
-        HStack(spacing: 12) {
-            /* if let selected = options.first(where: {
-                 $0.id == selectedOption?.id
-             }) {
-                 SelectedPill(title: selected.title, color: selected.accent)
-                     .transition(.opacity.combined(with: .move(edge: .bottom)))
-             } else {
-                 Text("No option selected")
-                     .font(.system(.subheadline, design: .rounded))
-                     .foregroundStyle(.secondary)
-             }*/
-
-            Spacer()
-
-            NavigationLink(
-                destination: {
-                    AnimationView(
-                        configuration: selectedOption?.configuration
-                            ?? .appenzell
-                    )
-                    .ignoresSafeArea()
-                },
-                label: {
-                    Label("Start", systemImage: "play.fill")
-                        .font(.system(.headline, design: .rounded))
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 12)
-
-                }
-            )
-            .buttonStyle(.borderedProminent)
-            .disabled(selectedOption == nil)
-
-            /*  Button {
-                  guard let selected = options.first(where: { $0.id == selectedID }) else { return }
-                  // Replace with your navigation/action
-                  print("Start tapped with: \(selected.title)")
-              } label: {
-                  Label("Start", systemImage: "play.fill")
-                      .font(.system(.headline, design: .rounded))
-                      .padding(.horizontal, 18)
-                      .padding(.vertical, 12)
-              }
-              .buttonStyle(.borderedProminent)
-              .disabled(selectedID == nil)*/
-        }
-    }
-
     private var background: some View {
         AnimationView(configuration: .background)
-            //.blur(radius: 10)
             .ignoresSafeArea()
-
-        /* // Fancy but still clean. Works on both iOS & macOS.
-         ZStack {
-             LinearGradient(
-                 colors: [
-                     Color.primary.opacity(0.06),
-                     Color.primary.opacity(0.02),
-                     Color.clear
-                 ],
-                 startPoint: .topLeading,
-                 endPoint: .bottomTrailing
-             )
-        
-             // A couple of soft "blobs"
-             Circle()
-                 .fill(Color.purple.opacity(0.12))
-                 .frame(width: 260, height: 260)
-                 .blur(radius: 30)
-                 .offset(x: -140, y: -200)
-        
-             Circle()
-                 .fill(Color.blue.opacity(0.10))
-                 .frame(width: 300, height: 300)
-                 .blur(radius: 35)
-                 .offset(x: 160, y: 260)
-         }
-         .ignoresSafeArea()*/
     }
 }
 
@@ -272,28 +193,15 @@ struct SelectableCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
-                // Placeholder "image" as a color tile
 
                 Image(option.image)
                     .resizable()
                     .clipShape(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                     )
-
                     .frame(height: 110)
                     .overlay(
                         HStack {
-                            /*Image(systemName: "sparkles")
-                                .font(
-                                    .system(
-                                        size: 22,
-                                        weight: .semibold,
-                                        design: .rounded
-                                    )
-                                )
-                                .foregroundStyle(.white.opacity(0.95))
-                                .padding(12)*/
-
                             Spacer()
 
                             if isSelected {
@@ -348,13 +256,14 @@ struct SelectableCard: View {
         RoundedRectangle(cornerRadius: 22, style: .continuous)
             .strokeBorder(
                 isSelected
-                    ? option.accent.opacity(0.9) : Color.primary.opacity(0.08),
+                    ? option.accent.opacity(0.9)
+                    : Color.primary.opacity(0.08),
                 lineWidth: isSelected ? 2.5 : 1
             )
     }
 }
 
-// MARK: - Selected Pill
+// MARK: - Selected Pill (unchanged, unused)
 
 struct SelectedPill: View {
     let title: String
@@ -384,7 +293,7 @@ struct SelectedPill: View {
     }
 }
 
-// MARK: - Previews (iOS + macOS)
+// MARK: - Previews
 
 struct FancyOptionPickerScreen_Previews: PreviewProvider {
     static var previews: some View {
