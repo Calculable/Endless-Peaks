@@ -35,57 +35,57 @@ struct FancyOptionPickerScreen: View {
     private let options: [OptionCard] = [
         .init(
             title: "Appenzell (Switzerland)",
-            subtitle: "Deep work mode",
-            accent: .blue,
+            subtitle: "Soft, rolling hills",
+            accent: Color.init(hex: "088EE4FF"),
             configuration: .appenzell,
             image: .appenzell
         ),
         .init(
             title: "Dolomites (Italy)",
-            subtitle: "Try something new",
-            accent: .purple,
+            subtitle: "Sharp ridges & stone towers",
+            accent: Color.init(hex: "#044277FF"),
             configuration: .dolomites,
             image: .dolomites
         ),
         .init(
             title: "Himalayas (Nepal/India/Tibet)",
-            subtitle: "Set goals & milestones",
-            accent: .indigo,
+            subtitle: "Extreme height & drama",
+            accent: Color.init(hex: "#BCEDFFFF"),
             configuration: .himalaya,
             image: .himalayas
         ),
         .init(
             title: "Scottish Highlands (Scotland)",
-            subtitle: "Review your progress",
-            accent: .teal,
+            subtitle: "Ancient, eroded hills",
+            accent: Color.init(hex: "#2E7BE2FF"),
             configuration: .scottishHighlands,
             image: .scottishHighlands
         ),
         .init(
             title: "Tassili n’Ajjer (Algeria)",
-            subtitle: "Make something cool",
-            accent: .orange,
+            subtitle: "Flat plateaus & sudden cliffs",
+            accent: Color.init(hex: "#000000FF"),
             configuration: .tassiliNAjjer,
             image: .tassiliNAjjer
         ),
         .init(
             title: "Torres del Paine (Patagonia)",
-            subtitle: "Take a mindful break",
-            accent: .pink,
+            subtitle: "Wild, broken rock",
+            accent: Color.init(hex: "#0096FFFF"),
             configuration: .torresDelPaine,
             image: .torresDelPaine
         ),
         .init(
             title: "Yosemite Valley (USA)",
-            subtitle: "Work with others",
-            accent: .red,
+            subtitle: "Sheer cliffs & granite walls",
+            accent: Color.init(hex: "#A7BAEBFF"),
             configuration: .yosemite,
             image: .yosemiteValley
         ),
         .init(
             title: "Zhangjiajie National Forest Park (China)",
-            subtitle: "Level up a skill",
-            accent: .green,
+            subtitle: "Vertical stone pillars",
+            accent: Color.init(hex: "#D38E63FF"),
             configuration: .zhangjiajie,
             image: .zhangjiajieNationalForestPark
         ),
