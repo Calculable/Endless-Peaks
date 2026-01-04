@@ -42,16 +42,55 @@ class MountainsConfiguration {
             .init(color: backgroundColor1, location: 0),
             .init(color: backgroundColor2, location: 0.5),
             .init(color: backgroundColor3, location: 1.0),
-
         ])
     }
+
+    init(numberOfMountains: Int = 10, maxPointsPerDepth: Int = 3, depth: Int = 2, speed: CGFloat = 0.01, zoomEffect2: CGFloat = 1.5, zoomEffect: CGFloat = 1.0, offsetEffect: CGFloat = 3, offsetEffect2: CGFloat = 1, backgroundColor1: Color = Color.random(), backgroundColor2: Color = Color.random(), backgroundColor3: SwiftUICore.Color = Color.white, foregroundColor: SwiftUICore.Color = Color.black, rounded: Bool = true) {
+        self.numberOfMountains = numberOfMountains
+        self.maxPointsPerDepth = maxPointsPerDepth
+        self.depth = depth
+        self.speed = speed
+        self.zoomEffect2 = zoomEffect2
+        self.zoomEffect = zoomEffect
+        self.offsetEffect = offsetEffect
+        self.offsetEffect2 = offsetEffect2
+        self.backgroundColor1 = backgroundColor1
+        self.backgroundColor2 = backgroundColor2
+        self.backgroundColor3 = backgroundColor3
+        self.foregroundColor = foregroundColor
+        self.rounded = rounded
+    }
+
+
+
+    static let appenzell = MountainsConfiguration(numberOfMountains: 10, maxPointsPerDepth: 1, depth: 2, speed: 0.005, zoomEffect2: 4.22, zoomEffect: 2.69, offsetEffect: 3.13, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "088EE4FF"), backgroundColor2: Color.init(hex: "5DCC38FF"), backgroundColor3: Color.init(hex: "00FF68FF"), foregroundColor: Color.black, rounded: true)
+
+    static let yosemite = MountainsConfiguration(numberOfMountains: 10, maxPointsPerDepth: 1, depth: 7, speed: 0.005, zoomEffect2: 2.8899999999999997, zoomEffect: 46.5, offsetEffect: 3.13, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#A7BAEBFF"), backgroundColor2: Color.init(hex: "#A9A9A9FF"), backgroundColor3: Color.init(hex: "#0D0B01FF"), foregroundColor: Color.black, rounded: false)
+
+    static let dolomites = MountainsConfiguration(numberOfMountains: 4, maxPointsPerDepth: 3, depth: 4, speed: 0.0025, zoomEffect2: 2.8899999999999997, zoomEffect: 4.22, offsetEffect: 3.13, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#044277FF"), backgroundColor2: Color.init(hex: "#F2F8FFFF"), backgroundColor3: Color.init(hex: "#FFFCF1FF"), foregroundColor: Color.black, rounded: false)
+
+    static let zhangjiajie = MountainsConfiguration(numberOfMountains: 23, maxPointsPerDepth: 7, depth: 2, speed: 0.005, zoomEffect2: 2.8899999999999997, zoomEffect: 4.22, offsetEffect: 3.13, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#D38E63FF"), backgroundColor2: Color.init(hex: "#D3FF7FFF"), backgroundColor3: Color.init(hex: "#FEFFFFFF"), foregroundColor: Color.black, rounded: true)
+
+    static let torresDelPaine = MountainsConfiguration(numberOfMountains: 7, maxPointsPerDepth: 8, depth: 2, speed: 0.005, zoomEffect2: 2.8899999999999997, zoomEffect: 4.22, offsetEffect: 3.13, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#0096FFFF"), backgroundColor2: Color.init(hex: "#FEFFFFFF"), backgroundColor3: Color.init(hex: "#FEFFFFFF"), foregroundColor: Color.black, rounded: false)
+
+    static let scottishHighlands = MountainsConfiguration(numberOfMountains: 7, maxPointsPerDepth: 3, depth: 2, speed: 0.005, zoomEffect2: 0.37, zoomEffect: 2.3, offsetEffect: 12.42, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#2E7BE2FF"), backgroundColor2: Color.init(hex: "#AFD300FF"), backgroundColor3: Color.init(hex: "#D6D9CDFF"), foregroundColor: Color.black, rounded: true)
+
+    static let tassiliNAjjer = MountainsConfiguration(numberOfMountains: 6, maxPointsPerDepth: 3, depth: 5, speed: 0.005, zoomEffect2: 1.29, zoomEffect: 5.1499999999999995, offsetEffect: 5.87, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#000000FF"), backgroundColor2: Color.init(hex: "#DF0010FF"), backgroundColor3: Color.init(hex: "#EBEEE3FF"), foregroundColor: Color.black, rounded: true)
+
+    static let himalaya = MountainsConfiguration(numberOfMountains: 16, maxPointsPerDepth: 3, depth: 5, speed: 0.005, zoomEffect2: 5.03, zoomEffect: 24.900000000000002, offsetEffect: 2.5, offsetEffect2: 7.1, backgroundColor1: Color.init(hex: "#BCEDFFFF"), backgroundColor2: Color.init(hex: "#FEFFFFFF"), backgroundColor3: Color.init(hex: "#FEFFFFFF"), foregroundColor: Color.black, rounded: true)
 }
 
 struct ContentView: View {
+    var body: some View {
+        AnimationView()
+    }
+}
+
+struct AnimationView: View {
     @State private var driver: DisplayRedrawDriver?
     @State private var animationValue: CGFloat = 0.0
     @State private var aspectRatio: CGFloat = 1
-    @State var configuration = MountainsConfiguration()
+    @State var configuration = MountainsConfiguration.tassiliNAjjer
     @State private var mountains = [MountainConfiguration]()
     private let maxAnimationValue = CGFloat(1)
 
@@ -251,6 +290,10 @@ struct ContentView: View {
                 )
 
                 Toggle("Rounded", isOn: $configuration.rounded)
+
+                Button("Print configuration") {
+                    print("MountainsConfiguration(numberOfMountains: \(configuration.numberOfMountains), maxPointsPerDepth: \(configuration.maxPointsPerDepth), depth: \(configuration.depth), speed: \(configuration.speed), zoomEffect2: \(configuration.zoomEffect2), zoomEffect: \(configuration.zoomEffect), offsetEffect: \(configuration.offsetEffect), offsetEffect2: \(configuration.offsetEffect2), backgroundColor1: Color.init(hex: \"\(configuration.backgroundColor1.toHex()!)\"), backgroundColor2: Color.init(hex: \"\(configuration.backgroundColor2.toHex()!)\"), backgroundColor3: Color.init(hex: \"\(configuration.backgroundColor3.toHex()!)\"), foregroundColor: Color.black, rounded: \(configuration.rounded ? "true" : "false"))")
+                }
 
             }.padding()
         }
