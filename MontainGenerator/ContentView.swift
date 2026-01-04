@@ -78,6 +78,8 @@ class MountainsConfiguration {
     static let tassiliNAjjer = MountainsConfiguration(numberOfMountains: 6, maxPointsPerDepth: 3, depth: 5, speed: 0.005, zoomEffect2: 1.29, zoomEffect: 5.1499999999999995, offsetEffect: 5.87, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#000000FF"), backgroundColor2: Color.init(hex: "#DF0010FF"), backgroundColor3: Color.init(hex: "#EBEEE3FF"), foregroundColor: Color.black, rounded: true)
 
     static let himalaya = MountainsConfiguration(numberOfMountains: 16, maxPointsPerDepth: 3, depth: 5, speed: 0.005, zoomEffect2: 5.03, zoomEffect: 24.900000000000002, offsetEffect: 2.5, offsetEffect2: 7.1, backgroundColor1: Color.init(hex: "#BCEDFFFF"), backgroundColor2: Color.init(hex: "#FEFFFFFF"), backgroundColor3: Color.init(hex: "#FEFFFFFF"), foregroundColor: Color.black, rounded: true)
+
+    static let background = MountainsConfiguration(numberOfMountains: 4, maxPointsPerDepth: 1, depth: 2, speed: 0.001, zoomEffect2: 4.22, zoomEffect: 2.69, offsetEffect: 3.13, offsetEffect2: 0.59, backgroundColor1: Color.init(hex: "#FEFFFFFF"), backgroundColor2: Color.init(hex: "#FEFFFFFF"), backgroundColor3: Color.init(hex: "#FEFFFFFF"), foregroundColor: Color.black, rounded: true)
 }
 
 struct ContentView: View {
@@ -146,7 +148,7 @@ struct AnimationView: View {
                 }
             }.clipped()
 
-           /* VStack {
+            /*VStack {
                 HStack {
                     Slider(
                         value: Binding(

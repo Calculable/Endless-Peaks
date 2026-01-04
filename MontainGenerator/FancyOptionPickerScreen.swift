@@ -15,6 +15,7 @@ struct OptionCard: Identifiable, Hashable {
     let subtitle: String
     let accent: Color
     let configuration: MountainsConfiguration
+    let image: ImageResource
 
     static func == (lhs: OptionCard, rhs: OptionCard) -> Bool {
         lhs.id == rhs.id
@@ -35,49 +36,57 @@ struct FancyOptionPickerScreen: View {
             title: "Appenzell (Switzerland)",
             subtitle: "Deep work mode",
             accent: .blue,
-            configuration: .appenzell
+            configuration: .appenzell,
+            image: .appenzell
         ),
         .init(
             title: "Dolomites (Italy)",
             subtitle: "Try something new",
             accent: .purple,
-            configuration: .dolomites
+            configuration: .dolomites,
+            image: .dolomites
         ),
         .init(
             title: "Himalayas (Nepal/India/Tibet)",
             subtitle: "Set goals & milestones",
             accent: .indigo,
-            configuration: .himalaya
+            configuration: .himalaya,
+            image: .himalayas
         ),
         .init(
             title: "Scottish Highlands (Scotland)",
             subtitle: "Review your progress",
             accent: .teal,
-            configuration: .scottishHighlands
+            configuration: .scottishHighlands,
+            image: .scottishHighlands
         ),
         .init(
             title: "Tassili n’Ajjer (Algeria)",
             subtitle: "Make something cool",
             accent: .orange,
-            configuration: .tassiliNAjjer
+            configuration: .tassiliNAjjer,
+            image: .tassiliNAjjer
         ),
         .init(
             title: "Torres del Paine (Patagonia)",
             subtitle: "Take a mindful break",
             accent: .pink,
-            configuration: .torresDelPaine
+            configuration: .torresDelPaine,
+            image: .torresDelPaine
         ),
         .init(
             title: "Yosemite Valley (USA)",
             subtitle: "Work with others",
             accent: .red,
-            configuration: .yosemite
+            configuration: .yosemite,
+            image: .yosemiteValley
         ),
         .init(
             title: "Zhangjiajie National Forest Park (China)",
             subtitle: "Level up a skill",
             accent: .green,
-            configuration: .zhangjiajie
+            configuration: .zhangjiajie,
+            image: .zhangjiajieNationalForestPark
         ),
 
     ]
@@ -96,8 +105,10 @@ struct FancyOptionPickerScreen: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                header
 
+                #if os(macOS)
+                    header
+                #endif
                 ScrollView {
                     LazyVGrid(columns: gridItems, spacing: 16) {
                         ForEach(options) { option in
@@ -126,14 +137,29 @@ struct FancyOptionPickerScreen: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
                 }
+                .safeAreaInset(edge: .bottom, alignment: .trailing) {
+                    footer
+                }
 
-                footer
+                #if os(macOS)
+                    footer
+                        .padding(.horizontal, 20)
+
+                #else
+
+
+
+
+                #endif
+
             }
-            .padding(.vertical, 20)
+            #if os(macOS)
+                .padding(.vertical, 20)
+            #endif
             .background(background)
-            .navigationTitle("Choose an Option")
+            .navigationTitle("Pick your animation")
             #if os(iOS)
-                .navigationBarTitleDisplayMode(.inline)
+                // .navigationBarTitleDisplayMode(.inline)
             #endif
         }
     }
@@ -142,7 +168,7 @@ struct FancyOptionPickerScreen: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Pick your next step")
+            Text("Pick your animation")
                 .font(.system(.largeTitle, design: .rounded).weight(.bold))
 
             Text("Select one of the options below, then press Start.")
@@ -155,22 +181,26 @@ struct FancyOptionPickerScreen: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            if let selected = options.first(where: {
-                $0.id == selectedOption?.id
-            }) {
-                SelectedPill(title: selected.title, color: selected.accent)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-            } else {
-                Text("No option selected")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
+            /* if let selected = options.first(where: {
+                 $0.id == selectedOption?.id
+             }) {
+                 SelectedPill(title: selected.title, color: selected.accent)
+                     .transition(.opacity.combined(with: .move(edge: .bottom)))
+             } else {
+                 Text("No option selected")
+                     .font(.system(.subheadline, design: .rounded))
+                     .foregroundStyle(.secondary)
+             }*/
 
             Spacer()
 
             NavigationLink(
                 destination: {
-                    AnimationView(configuration: selectedOption?.configuration ?? .appenzell)
+                    AnimationView(
+                        configuration: selectedOption?.configuration
+                            ?? .appenzell
+                    )
+                    .ignoresSafeArea()
                 },
                 label: {
                     Label("Start", systemImage: "play.fill")
@@ -196,12 +226,11 @@ struct FancyOptionPickerScreen: View {
               .buttonStyle(.borderedProminent)
               .disabled(selectedID == nil)*/
         }
-        .padding(.horizontal, 20)
     }
 
     private var background: some View {
-        AnimationView(configuration: selectedOption?.configuration ?? .appenzell)
-            .blur(radius: 10)
+        AnimationView(configuration: .background)
+            //.blur(radius: 10)
             .ignoresSafeArea()
 
         /* // Fancy but still clean. Works on both iOS & macOS.
@@ -244,21 +273,17 @@ struct SelectableCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
                 // Placeholder "image" as a color tile
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                option.accent.opacity(0.95),
-                                option.accent.opacity(0.55),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+
+                Image(option.image)
+                    .resizable()
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                     )
+
                     .frame(height: 110)
                     .overlay(
                         HStack {
-                            Image(systemName: "sparkles")
+                            /*Image(systemName: "sparkles")
                                 .font(
                                     .system(
                                         size: 22,
@@ -267,7 +292,7 @@ struct SelectableCard: View {
                                     )
                                 )
                                 .foregroundStyle(.white.opacity(0.95))
-                                .padding(12)
+                                .padding(12)*/
 
                             Spacer()
 
