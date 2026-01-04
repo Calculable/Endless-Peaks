@@ -28,37 +28,57 @@ struct OptionCard: Identifiable, Hashable {
 // MARK: - Screen
 
 struct FancyOptionPickerScreen: View {
-    @State private var selectedID: OptionCard.ID? = nil
+    @State private var selectedOption: OptionCard? = nil
 
     private let options: [OptionCard] = [
-        .init(title: "Focus", subtitle: "Deep work mode", accent: .blue, configuration: .appenzell),
-        .init(title: "Explore", subtitle: "Try something new", accent: .purple, configuration: .dolomites),
         .init(
-            title: "Plan",
+            title: "Appenzell (Switzerland)",
+            subtitle: "Deep work mode",
+            accent: .blue,
+            configuration: .appenzell
+        ),
+        .init(
+            title: "Dolomites (Italy)",
+            subtitle: "Try something new",
+            accent: .purple,
+            configuration: .dolomites
+        ),
+        .init(
+            title: "Himalayas (Nepal/India/Tibet)",
             subtitle: "Set goals & milestones",
             accent: .indigo,
             configuration: .himalaya
         ),
         .init(
-            title: "Reflect",
+            title: "Scottish Highlands (Scotland)",
             subtitle: "Review your progress",
             accent: .teal,
             configuration: .scottishHighlands
         ),
         .init(
-            title: "Create",
+            title: "Tassili n’Ajjer (Algeria)",
             subtitle: "Make something cool",
             accent: .orange,
             configuration: .tassiliNAjjer
         ),
         .init(
-            title: "Recharge",
+            title: "Torres del Paine (Patagonia)",
             subtitle: "Take a mindful break",
             accent: .pink,
             configuration: .torresDelPaine
         ),
-        .init(title: "Collaborate", subtitle: "Work with others", accent: .red, configuration: .yosemite),
-        .init(title: "Learn", subtitle: "Level up a skill", accent: .green, configuration: .zhangjiajie),
+        .init(
+            title: "Yosemite Valley (USA)",
+            subtitle: "Work with others",
+            accent: .red,
+            configuration: .yosemite
+        ),
+        .init(
+            title: "Zhangjiajie National Forest Park (China)",
+            subtitle: "Level up a skill",
+            accent: .green,
+            configuration: .zhangjiajie
+        ),
 
     ]
 
@@ -83,7 +103,7 @@ struct FancyOptionPickerScreen: View {
                         ForEach(options) { option in
                             SelectableCard(
                                 option: option,
-                                isSelected: selectedID == option.id
+                                isSelected: selectedOption?.id == option.id
                             ) {
                                 withAnimation(
                                     .spring(
@@ -91,14 +111,15 @@ struct FancyOptionPickerScreen: View {
                                         dampingFraction: 0.85
                                     )
                                 ) {
-                                    selectedID = option.id
+                                    selectedOption = option
                                 }
                             }
                             .accessibilityLabel(
                                 "\(option.title). \(option.subtitle)"
                             )
                             .accessibilityAddTraits(
-                                selectedID == option.id ? .isSelected : []
+                                selectedOption?.id == option.id
+                                    ? .isSelected : []
                             )
                         }
                     }
@@ -134,7 +155,9 @@ struct FancyOptionPickerScreen: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            if let selected = options.first(where: { $0.id == selectedID }) {
+            if let selected = options.first(where: {
+                $0.id == selectedOption?.id
+            }) {
                 SelectedPill(title: selected.title, color: selected.accent)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
             } else {
@@ -147,7 +170,7 @@ struct FancyOptionPickerScreen: View {
 
             NavigationLink(
                 destination: {
-                    AnimationView()
+                    AnimationView(configuration: selectedOption?.configuration ?? .appenzell)
                 },
                 label: {
                     Label("Start", systemImage: "play.fill")
@@ -158,7 +181,7 @@ struct FancyOptionPickerScreen: View {
                 }
             )
             .buttonStyle(.borderedProminent)
-            .disabled(selectedID == nil)
+            .disabled(selectedOption == nil)
 
             /*  Button {
                   guard let selected = options.first(where: { $0.id == selectedID }) else { return }
@@ -177,7 +200,7 @@ struct FancyOptionPickerScreen: View {
     }
 
     private var background: some View {
-        AnimationView()
+        AnimationView(configuration: selectedOption?.configuration ?? .appenzell)
             .blur(radius: 10)
             .ignoresSafeArea()
 
