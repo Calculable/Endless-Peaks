@@ -34,56 +34,56 @@ struct FancyOptionPickerScreen: View {
 
     private let options: [OptionCard] = [
         .init(
-            title: "Appenzell (Switzerland)",
+            title: "Appenzell",
             subtitle: "Soft, rolling hills",
             accent: Color.init(hex: "088EE4FF"),
             configuration: .appenzell,
             image: .appenzell
         ),
         .init(
-            title: "Dolomites (Italy)",
+            title: "Dolomites",
             subtitle: "Sharp ridges & stone towers",
             accent: Color.init(hex: "#044277FF"),
             configuration: .dolomites,
             image: .dolomites
         ),
         .init(
-            title: "Himalayas (Nepal/India/Tibet)",
-            subtitle: "Extreme height & drama",
+            title: "Himalaya",
+            subtitle: "Extreme height",
             accent: Color.init(hex: "#BCEDFFFF"),
             configuration: .himalaya,
-            image: .himalayas
+            image: .himalaya
         ),
         .init(
-            title: "Scottish Highlands (Scotland)",
+            title: "Scottish Highlands",
             subtitle: "Ancient, eroded hills",
             accent: Color.init(hex: "#2E7BE2FF"),
             configuration: .scottishHighlands,
             image: .scottishHighlands
         ),
         .init(
-            title: "Tassili n’Ajjer (Algeria)",
+            title: "Tassili n’Ajjer",
             subtitle: "Flat plateaus & sudden cliffs",
             accent: Color.init(hex: "#000000FF"),
             configuration: .tassiliNAjjer,
             image: .tassiliNAjjer
         ),
         .init(
-            title: "Torres del Paine (Patagonia)",
+            title: "Torres del Paine",
             subtitle: "Wild, broken rock",
             accent: Color.init(hex: "#0096FFFF"),
             configuration: .torresDelPaine,
             image: .torresDelPaine
         ),
         .init(
-            title: "Yosemite Valley (USA)",
+            title: "Yosemite Valley",
             subtitle: "Sheer cliffs & granite walls",
             accent: Color.init(hex: "#A7BAEBFF"),
             configuration: .yosemite,
             image: .yosemiteValley
         ),
         .init(
-            title: "Zhangjiajie National Forest Park (China)",
+            title: "Zhangjiajie National Forest Park",
             subtitle: "Vertical stone pillars",
             accent: Color.init(hex: "#D38E63FF"),
             configuration: .zhangjiajie,

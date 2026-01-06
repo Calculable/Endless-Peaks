@@ -189,9 +189,9 @@ class MountainsConfiguration {
 
     static let himalaya = MountainsConfiguration(
         numberOfMountains: 16,
-        maxPointsPerDepth: 3,
-        depth: 5,
-        speed: 0.005,
+        maxPointsPerDepth: 4,
+        depth: 4,
+        speed: 0.004,
         zoomEffect2: 5.03,
         zoomEffect: 24.900000000000002,
         offsetEffect: 10.0,
@@ -508,7 +508,7 @@ struct AnimationView: View {
         return MountainConfiguration(
             maxPointsPerDepth: max(
                 1,
-                Int(CGFloat(configuration.maxPointsPerDepth) * aspectRatio)
+                max(configuration.maxPointsPerDepth,  Int(CGFloat(configuration.maxPointsPerDepth) * aspectRatio))
             ),
             depth: configuration.depth
         )
