@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+internal import Combine
 
 private struct SizeKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
@@ -227,13 +228,57 @@ struct ContentView: View {
     }
 }
 
+@MainActor
+final class AnimationEngine: ObservableObject {
+
+    private let speed: CGFloat
+    let maxAnimationValue = CGFloat(1)
+    @Published var animationValue: CGFloat = 0.0
+
+    init(speed: CGFloat) {
+        self.speed = speed
+        print("init engine")
+    }
+
+    func nextFrame() {
+        print("next frame. Current animationValue \(animationValue)")
+        animationValue += speed
+        print("animationValue is now \(animationValue)")
+
+        if animationValue >= maxAnimationValue {
+            animationValue = 0
+        }
+    }
+}
+
+
+
 struct AnimationView: View {
     @State private var driver: DisplayRedrawDriver?
-    @State private var animationValue: CGFloat = 0.0
     @State private var aspectRatio: CGFloat = 1
     @State var configuration = MountainsConfiguration.tassiliNAjjer
     @State private var mountains = [MountainConfiguration]()
-    private let maxAnimationValue = CGFloat(1)
+    @State private var didAppearOnce = false
+
+    @StateObject var engine: AnimationEngine
+
+    init(
+        configuration: MountainsConfiguration = .tassiliNAjjer,
+        engine: AnimationEngine
+    ) {
+        print("init animation view")
+        _driver = State(initialValue: nil)
+        _aspectRatio = State(initialValue: 1)
+        _configuration = State(initialValue: configuration)
+        _mountains = State(initialValue: [])
+
+        _engine = StateObject(wrappedValue: engine)
+
+        regenerateMountains()
+
+    }
+
+
 
     var background: some View {
         Rectangle()
@@ -445,22 +490,23 @@ struct AnimationView: View {
 
             }.clipped()
                 .onAppear {
+                    print("on appear")
                     aspectRatio = geo.size.width / max(geo.size.height, 1)
-                    print(aspectRatio)
-                    regenerateMountains()
-                    driver = DisplayRedrawDriver { t in
-                        animationValue += self.configuration.speed
-                        if animationValue >= maxAnimationValue {
-                            animationValue = 0
-                            let mountain = generateMountainConfiguration()
-                            mountains.insert(mountain, at: 0)
-                            mountains.removeLast()
-                        }
+                    if didAppearOnce == false {
+                        regenerateMountains()
+                        didAppearOnce = true
                     }
-                    driver?.start()
+                    
+                    //print(aspectRatio)
+                    //regenerateMountains()
+                    /*driver = DisplayRedrawDriver { t in
+                        engine.nextFrame()
+                    }
+                    driver?.start()*/
+
                 }
                 .onDisappear {
-                    driver?.stop()
+                    //driver?.stop()
                 }
                 .onChange(of: self.configuration.maxPointsPerDepth) {
                     regenerateMountains()
@@ -471,6 +517,14 @@ struct AnimationView: View {
                 .onChange(of: self.configuration.numberOfMountains) {
                     regenerateMountains()
                 }
+                .onChange(of: self.engine.animationValue) { newValue in
+                    print("new animation value: \(newValue)")
+                    if newValue == 0 {
+                        let mountain = generateMountainConfiguration()
+                        mountains.insert(mountain, at: 0)
+                        mountains.removeLast()
+                    }
+                }
 
         }
 
@@ -480,19 +534,20 @@ struct AnimationView: View {
         //von 0 bis 1
 
         let index = CGFloat(index)
-        let animationValue = CGFloat(animationValue)
+        let animationValue = CGFloat(self.engine.animationValue)
         let numberOfMountains = CGFloat(configuration.numberOfMountains)
 
         return
             ((index
             + (((animationValue.truncatingRemainder(
-                dividingBy: maxAnimationValue
-            )) / maxAnimationValue))) / numberOfMountains)
+                dividingBy: self.engine.maxAnimationValue
+            )) / self.engine.maxAnimationValue))) / numberOfMountains)
 
     }
 
     func regenerateMountains() {
-        animationValue = 0
+        print("regenerate mountains")
+        self.engine.animationValue = 0
         mountains.removeAll()
 
         for _ in 0..<configuration.numberOfMountains {
@@ -504,7 +559,6 @@ struct AnimationView: View {
     }
 
     func generateMountainConfiguration() -> MountainConfiguration {
-        print(configuration.maxPointsPerDepth * Int(aspectRatio))
         return MountainConfiguration(
             maxPointsPerDepth: max(
                 1,

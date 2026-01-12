@@ -105,6 +105,36 @@ struct FancyOptionPickerScreen: View {
         NavigationStack {
             VStack(spacing: 16) {
 
+                #if canImport(UIKit)
+
+                Button("Export Video") {
+
+                    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                    let outputURL = documentsURL.appendingPathComponent("myVideo.mp4")
+
+                    if FileManager.default.fileExists(atPath: outputURL.path) {
+                        try! FileManager.default.removeItem(at: outputURL)
+                    }
+
+                    Task { @MainActor in
+                        do {
+
+                            let configuration = MountainsConfiguration.appenzell
+                            let engine =  AnimationEngine(speed: configuration.speed)
+
+                            let exporter = AnimationVideoExporter()
+
+                            try await exporter.export(configuration: configuration, engine: engine, outputURL: outputURL, size: CGSize(width: 1080, height: 1080), fps: 60, frameCount: 300)
+
+
+                            print("Video written to:", outputURL)
+                        } catch {
+                            print("Export failed:", error)
+                        }
+                    }
+                }
+                #endif
+
                 #if os(macOS)
                 header
                 #endif
@@ -145,7 +175,7 @@ struct FancyOptionPickerScreen: View {
             #if os(macOS)
             .padding(.vertical, 20)
             #endif
-            .background(background)
+            //.background(background)
 
 #if os(macOS)
             .navigationTitle("Mountain Generator")
@@ -156,7 +186,7 @@ struct FancyOptionPickerScreen: View {
 
 
             .navigationDestination(item: $navigateTo) { option in
-                AnimationView(configuration: option.configuration)
+                AnimationView(configuration: option.configuration, engine: .init(speed: option.configuration.speed))
                     .ignoresSafeArea()
             }
         }
@@ -178,7 +208,7 @@ struct FancyOptionPickerScreen: View {
     }
 
     private var background: some View {
-        AnimationView(configuration: .background)
+        AnimationView(configuration: .background, engine: .init(speed: MountainsConfiguration.background.speed))
             .ignoresSafeArea()
     }
 }
