@@ -105,8 +105,6 @@ struct FancyOptionPickerScreen: View {
         NavigationStack {
             VStack(spacing: 16) {
 
-                #if canImport(UIKit)
-
                 Button("Export Video") {
 
                     let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -124,7 +122,7 @@ struct FancyOptionPickerScreen: View {
 
                             let exporter = AnimationVideoExporter()
 
-                            try await exporter.export(configuration: configuration, engine: engine, outputURL: outputURL, size: CGSize(width: 1080, height: 1080), fps: 60, frameCount: 300)
+                            try await exporter.export(configuration: configuration, engine: engine, outputURL: outputURL, size: CGSize(width: 1080, height: 1080), fps: 60, frameCount: 100)
 
 
                             print("Video written to:", outputURL)
@@ -133,7 +131,6 @@ struct FancyOptionPickerScreen: View {
                         }
                     }
                 }
-                #endif
 
                 #if os(macOS)
                 header

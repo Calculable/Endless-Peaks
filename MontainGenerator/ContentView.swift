@@ -496,7 +496,7 @@ struct AnimationView: View {
                         regenerateMountains()
                         didAppearOnce = true
                     }
-                    
+
                     //print(aspectRatio)
                     //regenerateMountains()
                     /*driver = DisplayRedrawDriver { t in
