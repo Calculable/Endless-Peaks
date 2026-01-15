@@ -122,7 +122,14 @@ struct FancyOptionPickerScreen: View {
 
                             let exporter = AnimationVideoExporter()
 
-                            try await exporter.export(configuration: configuration, engine: engine, outputURL: outputURL, size: CGSize(width: 1080, height: 1080), fps: 60, frameCount: 100)
+                            try await exporter.export(
+                                configuration: configuration,
+                                engine: engine,
+                                outputURL: outputURL,
+                                size: CGSize(width: 3840, height: 2160),
+                                fps: 60,
+                                frameCount: 11520
+                            )
 
 
                             print("Video written to:", outputURL)

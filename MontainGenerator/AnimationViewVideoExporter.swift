@@ -76,6 +76,15 @@ public final class AnimationVideoExporter {
         let prefersProRes = useProRes422 && proResAvailable
         let prefersHEVC = preferHEVCMain10 && !prefersProRes
 
+        // Prefer 10-bit pixel buffers on macOS when using ProRes or HEVC
+        #if os(macOS)
+        let pixelFormat: OSType = (prefersProRes || prefersHEVC)
+            ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
+            : kCVPixelFormatType_32BGRA
+        #else
+        let pixelFormat: OSType = kCVPixelFormatType_32BGRA
+        #endif
+
         let fileType: AVFileType = prefersProRes ? .mov : .mp4
         let writer = try AVAssetWriter(outputURL: outputURL, fileType: fileType)
 
@@ -117,7 +126,7 @@ public final class AnimationVideoExporter {
         let adaptor = AVAssetWriterInputPixelBufferAdaptor(
             assetWriterInput: input,
             sourcePixelBufferAttributes: [
-                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferPixelFormatTypeKey as String: pixelFormat,
                 kCVPixelBufferWidthKey as String: Int(size.width),
                 kCVPixelBufferHeightKey as String: Int(size.height),
                 kCVPixelBufferCGImageCompatibilityKey as String: true,
@@ -151,12 +160,8 @@ public final class AnimationVideoExporter {
             await tickMainRunLoopOnce()
 
             // Ensure layout is current
-            #if canImport(UIKit)
-            container.setNeedsLayout()
-            container.layoutIfNeeded()
-            #elseif canImport(AppKit)
-            container.layoutSubtreeIfNeeded()
-            #endif
+            /*container.setNeedsLayout()
+            container.layoutIfNeeded()*/
 
             // Snapshot hosted view -> CGImage
             guard let cgImage = snapshotCGImage(of: container, size: size, scale: scale) else {
@@ -170,10 +175,10 @@ public final class AnimationVideoExporter {
                 try await Task.sleep(nanoseconds: 1_000_000)
             }
 
-            guard let pixelBuffer = makePixelBuffer(width: Int(size.width), height: Int(size.height)) else {
+            guard let pixelBuffer = makePixelBuffer(width: Int(size.width), height: Int(size.height), pixelFormat: pixelFormat) else {
                 continue
             }
-            draw(dithered, into: pixelBuffer)
+            draw(dithered, into: pixelBuffer, pixelFormat: pixelFormat)
 
             let pts = CMTimeMultiply(frameDuration, multiplier: Int32(frameIndex))
             if !adaptor.append(pixelBuffer, withPresentationTime: pts) {
@@ -231,7 +236,7 @@ private func snapshotCGImage(of view: PlatformView, size: CGSize, scale: CGFloat
 
 // MARK: - PixelBuffer + draw
 
-private func makePixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
+private func makePixelBuffer(width: Int, height: Int, pixelFormat: OSType) -> CVPixelBuffer? {
     let attrs: [CFString: Any] = [
         kCVPixelBufferCGImageCompatibilityKey: true,
         kCVPixelBufferCGBitmapContextCompatibilityKey: true
@@ -241,40 +246,53 @@ private func makePixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
         kCFAllocatorDefault,
         width,
         height,
-        kCVPixelFormatType_32BGRA,
+        pixelFormat,
         attrs as CFDictionary,
         &pb
     )
     return status == kCVReturnSuccess ? pb : nil
 }
 
-private func draw(_ cgImage: CGImage, into pixelBuffer: CVPixelBuffer) {
-    CVPixelBufferLockBaseAddress(pixelBuffer, [])
-    defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
+private func draw(_ cgImage: CGImage, into pixelBuffer: CVPixelBuffer, pixelFormat: OSType) {
+    switch pixelFormat {
+    case kCVPixelFormatType_32BGRA:
+        CVPixelBufferLockBaseAddress(pixelBuffer, [])
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
 
-    guard let base = CVPixelBufferGetBaseAddress(pixelBuffer) else { return }
+        guard let base = CVPixelBufferGetBaseAddress(pixelBuffer) else { return }
 
-    let width = CVPixelBufferGetWidth(pixelBuffer)
-    let height = CVPixelBufferGetHeight(pixelBuffer)
-    let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
 
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    let bitmapInfo = CGBitmapInfo.byteOrder32Little.union(
-        CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
-    )
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo.byteOrder32Little.union(
+            CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
+        )
 
-    guard let ctx = CGContext(
-        data: base,
-        width: width,
-        height: height,
-        bitsPerComponent: 8,
-        bytesPerRow: bytesPerRow,
-        space: colorSpace,
-        bitmapInfo: bitmapInfo.rawValue
-    ) else { return }
+        guard let ctx = CGContext(
+            data: base,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo.rawValue
+        ) else { return }
 
-    ctx.clear(CGRect(x: 0, y: 0, width: width, height: height))
-    ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        ctx.clear(CGRect(x: 0, y: 0, width: width, height: height))
+        ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+    default:
+        // Render via Core Image into 10-bit YUV buffer (macOS)
+        #if os(macOS)
+        let ciImage = CIImage(cgImage: cgImage)
+        let colorSpace = CGColorSpace(name: CGColorSpace.itur_709) ?? CGColorSpaceCreateDeviceRGB()
+        sharedCIContext.render(ciImage, to: pixelBuffer, bounds: ciImage.extent, colorSpace: colorSpace)
+        #else
+        break
+        #endif
+    }
 }
 
 private func applyDither(to cgImage: CGImage, amount: CGFloat) -> CGImage? {
