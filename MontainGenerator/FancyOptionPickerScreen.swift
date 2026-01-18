@@ -117,7 +117,7 @@ struct FancyOptionPickerScreen: View {
                     Task { @MainActor in
                         do {
 
-                            let configuration = MountainsConfiguration.appenzell
+                            let configuration = MountainsConfiguration.zhangjiajie
                             let engine =  AnimationEngine(speed: configuration.speed)
 
                             let exporter = AnimationVideoExporter()
@@ -128,7 +128,7 @@ struct FancyOptionPickerScreen: View {
                                 outputURL: outputURL,
                                 size: CGSize(width: 3840, height: 2160),
                                 fps: 60,
-                                frameCount: 11520
+                                frameCount: 5
                             )
 
 
