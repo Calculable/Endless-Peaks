@@ -190,8 +190,7 @@ struct FancyOptionPickerScreen: View {
 
 
             .navigationDestination(item: $navigateTo) { option in
-                AnimationView(configuration: option.configuration, engine: .init(speed: option.configuration.speed))
-                    .ignoresSafeArea()
+                FullscreenAnimationScreen(configuration: option.configuration)
             }
         }
     }

@@ -248,13 +248,10 @@ final class AnimationEngine: ObservableObject {
 
     init(speed: CGFloat) {
         self.speed = speed
-        print("init engine")
     }
 
     func nextFrame() {
-        print("next frame. Current animationValue \(animationValue)")
         animationValue += speed
-        print("animationValue is now \(animationValue)")
 
         if animationValue >= maxAnimationValue {
             animationValue = 0
@@ -271,22 +268,19 @@ struct AnimationView: View {
     @State private var mountains = [MountainConfiguration]()
     @State private var didAppearOnce = false
 
-    @StateObject var engine: AnimationEngine
+    @ObservedObject var engine: AnimationEngine
     @State private var musicPlayer = BackgroundMusicPlayer()
 
     init(
         configuration: MountainsConfiguration = .tassiliNAjjer,
         engine: AnimationEngine
     ) {
-        print("init animation view")
         _driver = State(initialValue: nil)
         _aspectRatio = State(initialValue: 1)
         _configuration = State(initialValue: configuration)
         _mountains = State(initialValue: [])
 
-        _engine = StateObject(wrappedValue: engine)
-
-        regenerateMountains()
+        _engine = ObservedObject(wrappedValue: engine)
 
     }
 
@@ -502,21 +496,26 @@ struct AnimationView: View {
 
             }.clipped()
                 .onAppear {
-                    print("on appear")
                     aspectRatio = geo.size.width / max(geo.size.height, 1)
                     if didAppearOnce == false {
-                        regenerateMountains()
-                        didAppearOnce = true
+                        Task { @MainActor in
+                            await Task.yield()
+                            regenerateMountains()
+                            didAppearOnce = true
+                        }
                     }
 
                     musicPlayer.play(resourceName: configuration.musicFileName)
 
-                    //print(aspectRatio)
                     //regenerateMountains()
-                    driver = DisplayRedrawDriver { t in
+                    let newDriver = DisplayRedrawDriver { _ in
                         engine.nextFrame()
                     }
-                    driver?.start()
+                    driver = newDriver
+                    Task { @MainActor in
+                        await Task.yield()
+                        newDriver.start()
+                    }
 
                 }
                 .onDisappear {
@@ -524,17 +523,28 @@ struct AnimationView: View {
                     musicPlayer.stop()
                 }
                 .onChange(of: self.configuration.maxPointsPerDepth) {
-                    regenerateMountains()
+                    Task { @MainActor in
+                        await Task.yield()
+                        regenerateMountains()
+                    }
                 }
                 .onChange(of: self.configuration.depth) {
-                    regenerateMountains()
+                    Task { @MainActor in
+                        await Task.yield()
+                        regenerateMountains()
+                    }
                 }
                 .onChange(of: self.configuration.numberOfMountains) {
-                    regenerateMountains()
+                    Task { @MainActor in
+                        await Task.yield()
+                        regenerateMountains()
+                    }
                 }
                 .onChange(of: self.engine.animationValue) { newValue in
-                    print("new animation value: \(newValue)")
-                    if newValue == 0 {
+                    guard newValue == 0 else { return }
+                    Task { @MainActor in
+                        await Task.yield()
+                        guard mountains.isEmpty == false else { return }
                         let mountain = generateMountainConfiguration()
                         mountains.insert(mountain, at: 0)
                         mountains.removeLast()
@@ -561,7 +571,6 @@ struct AnimationView: View {
     }
 
     func regenerateMountains() {
-        print("regenerate mountains")
         self.engine.animationValue = 0
         mountains.removeAll()
 

@@ -64,6 +64,7 @@ final class DisplayRedrawDriver {
 
                     // CVDisplayLink is NOT on the main thread -> hop to main.
                     Task { @MainActor in
+                        await Task.yield()
                         me.onFrame(seconds)
                     }
                     return kCVReturnSuccess
@@ -92,6 +93,7 @@ final class DisplayRedrawDriver {
     #if os(iOS) || os(tvOS) || os(visionOS)
         @objc private func tick(_ link: CADisplayLink) {
             Task { @MainActor in
+                await Task.yield()
                 onFrame(link.timestamp)
             }
         }
