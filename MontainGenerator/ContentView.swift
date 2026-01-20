@@ -35,17 +35,11 @@ class MountainsConfiguration {
     var backgroundColor1 = Color.random()
     var backgroundColor2 = Color.random()
     var backgroundColor3 = Color.white
+    var backgroundColorForVideo = Color.random()
     var foregroundColor = Color.black
     var rounded: Bool = true
     var musicFileName: String? = nil
-
-    var backgroundGradient: Gradient {
-        Gradient(stops: [
-            .init(color: backgroundColor1, location: 0),
-            .init(color: backgroundColor2, location: 0.5),
-            .init(color: backgroundColor3, location: 1.0),
-        ])
-    }
+    var mountainPalette: [Color] = []
 
     init(
         numberOfMountains: Int = 10,
@@ -59,9 +53,11 @@ class MountainsConfiguration {
         backgroundColor1: Color = Color.random(),
         backgroundColor2: Color = Color.random(),
         backgroundColor3: SwiftUICore.Color = Color.white,
+        backgroundColorForVideo: Color = Color.random(),
         foregroundColor: SwiftUICore.Color = Color.black,
         rounded: Bool = true,
-        musicFileName: String? = nil
+        musicFileName: String? = nil,
+        mountainPalette: [Color] = []
     ) {
         self.numberOfMountains = numberOfMountains
         self.maxPointsPerDepth = maxPointsPerDepth
@@ -74,9 +70,11 @@ class MountainsConfiguration {
         self.backgroundColor1 = backgroundColor1
         self.backgroundColor2 = backgroundColor2
         self.backgroundColor3 = backgroundColor3
+        self.backgroundColorForVideo = backgroundColorForVideo
         self.foregroundColor = foregroundColor
         self.rounded = rounded
         self.musicFileName = musicFileName
+        self.mountainPalette = mountainPalette
     }
 
     static let appenzell = MountainsConfiguration(
@@ -91,9 +89,16 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#089EFFFF"),
         backgroundColor2: Color.init(hex: "#C2FF3EFF"),
         backgroundColor3: Color.init(hex: "#FEFFFFFF"),
+        backgroundColorForVideo: Color.init(hex: "#1F80A6FF"),
         foregroundColor: Color.black,
         rounded: true,
-        musicFileName: "Appenzell"
+        musicFileName: "Appenzell",
+        mountainPalette: [
+            Color(hex: "#1C594EFF"), // mossy green
+            Color(hex: "#BBBF49FF"), // olive
+            Color(hex: "#BFBA69FF"), // warm earth
+
+        ]
     )
 
     static let yosemite = MountainsConfiguration(
@@ -108,9 +113,15 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#29353FFF"),
         backgroundColor2: Color.init(hex: "#8D9FA6FF"),
         backgroundColor3: Color.init(hex: "#0D0B01FF"),
+        backgroundColorForVideo: Color.init(hex: "#8E9EBFFF"),
         foregroundColor: Color.black,
         rounded: false,
-        musicFileName: "Yosemite_Valley"
+        musicFileName: "Yosemite_Valley",
+        mountainPalette: [
+            Color(hex: "#F2DFE0FF"), // shadow granite
+            Color(hex: "#734B43FF"), // granite light
+            Color(hex: "#261615FF"), // deep pine
+        ]
     )
 
     static let dolomites = MountainsConfiguration(
@@ -125,9 +136,16 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#102225FF"),
         backgroundColor2: Color.init(hex: "#BFBFB9FF"),
         backgroundColor3: Color.init(hex: "#8C8B88FF"),
+        backgroundColorForVideo: Color.init(hex: "#595959FF"),
         foregroundColor: Color.black,
         rounded: false,
-        musicFileName: "Dolomiten"
+        musicFileName: "Dolomiten",
+        mountainPalette: [
+            Color(hex: "#F2F2F2FF"), // deep shadow
+            Color(hex: "#A6A6A6FF"), // cool grey
+            Color(hex: "#262626FF"), // pale stone
+            Color(hex: "#0D0D0DFF"), // limestone
+        ]
     )
 
     static let zhangjiajie = MountainsConfiguration(
@@ -142,9 +160,16 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#F2AC85FF"),
         backgroundColor2: Color.init(hex: "#83A605FF"),
         backgroundColor3: Color.init(hex: "#5A7304FF"),
+        backgroundColorForVideo: Color.init(hex: "#ADC5D9FF"),
         foregroundColor: Color.black,
         rounded: true,
-        musicFileName: "Zhangjiajie_National_Forest_Park"
+        musicFileName: "Zhangjiajie_National_Forest_Park",
+        mountainPalette: [
+            Color(hex: "#3F5925FF"), // mist shadow
+            Color(hex: "#708C32FF"), // deep jade
+            Color(hex: "#364022FF"), // moss green
+            Color(hex: "#89A61FFF"), // mist blue
+        ]
     )
 
     static let torresDelPaine = MountainsConfiguration(
@@ -159,9 +184,16 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#5E6573FF"),
         backgroundColor2: Color.init(hex: "#F2984BFF"),
         backgroundColor3: Color.init(hex: "#F2845CFF"),
+        backgroundColorForVideo: Color.init(hex: "#5D6C8CFF"),
         foregroundColor: Color.black,
         rounded: false,
-        musicFileName: "Torres_del_Paine"
+        musicFileName: "Torres_del_Paine",
+        mountainPalette: [
+            Color(hex: "#242B40FF"), // storm blue
+            Color(hex: "#F2C1AEFF"), // glacial teal
+            Color(hex: "#F27A5EFF"), // granite
+            Color(hex: "#D98B8BFF"), // earth
+        ]
     )
 
     static let scottishHighlands = MountainsConfiguration(
@@ -176,9 +208,17 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#A68D9CFF"),
         backgroundColor2: Color.init(hex: "#F2CC88FF"),
         backgroundColor3: Color.init(hex: "#898C2AFF"),
+        backgroundColorForVideo: Color.init(hex: "#F2CC88FF"),
         foregroundColor: Color.black,
         rounded: true,
-        musicFileName: "Schottische_Highlands"
+        musicFileName: "Schottische_Highlands",
+        mountainPalette: [
+            Color(hex: "#243B34FF"), // deep green
+            Color(hex: "#4E6B3FFF"), // moss
+            Color(hex: "#6A6E3FFF"), // olive peat
+            Color(hex: "#4B3B2BFF"), // peat brown
+            Color(hex: "#6B4A6FFF"), // heather
+        ]
     )
 
     static let tassiliNAjjer = MountainsConfiguration(
@@ -193,9 +233,17 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#250303FF"),
         backgroundColor2: Color.init(hex: "#E32413FF"),
         backgroundColor3: Color.init(hex: "#89A1B2FF"),
+        backgroundColorForVideo: Color.init(hex: "#E32413FF"),
         foregroundColor: Color.black,
         rounded: true,
-        musicFileName: "Tassili_n_Ajjer"
+        musicFileName: "Tassili_n_Ajjer",
+        mountainPalette: [
+            Color(hex: "#2B1E1BFF"), // dark shadow
+            Color(hex: "#8C2F20FF"), // red rock
+            Color(hex: "#B36A2EFF"), // ochre
+            Color(hex: "#C9A46AFF"), // sand
+            Color(hex: "#B0675EFF"), // dusty rose
+        ]
     )
 
     static let himalaya = MountainsConfiguration(
@@ -210,9 +258,16 @@ class MountainsConfiguration {
         backgroundColor1: Color.init(hex: "#224459FF"),
         backgroundColor2: Color.init(hex: "#95C6D9FF"),
         backgroundColor3: Color.init(hex: "#AFE8FFFF"),
+        backgroundColorForVideo: Color.init(hex: "#424659FF"),
         foregroundColor: Color.black,
         rounded: true,
-        musicFileName: "Himalaya"
+        musicFileName: "Himalaya",
+        mountainPalette: [
+            Color(hex: "#C4C1D9FF"), // deep navy
+            Color(hex: "#8688A6FF"), // slate
+            Color(hex: "#686D8CFF"), // cold blue-grey
+            Color(hex: "#00010DFF"), // ice blue
+        ]
     )
 
     static let background = MountainsConfiguration(
@@ -230,6 +285,12 @@ class MountainsConfiguration {
         foregroundColor: Color.black,
         rounded: true
     )
+
+    func mountainColor(seed: UInt64) -> Color {
+        let palette = mountainPalette.isEmpty ? [foregroundColor] : mountainPalette
+        let base = palette[Int(seed % UInt64(palette.count))]
+        return base.toneVariant(seed: seed)
+    }
 
 }
 
@@ -271,6 +332,8 @@ struct AnimationView: View {
     @ObservedObject var engine: AnimationEngine
     @State private var musicPlayer = BackgroundMusicPlayer()
 
+    let isRenderedForVideo = true
+
     init(
         configuration: MountainsConfiguration = .tassiliNAjjer,
         engine: AnimationEngine
@@ -286,11 +349,26 @@ struct AnimationView: View {
 
 
 
+    @ViewBuilder
     var background: some View {
-        Rectangle()
-            .fill(
-                configuration.backgroundGradient
-            )
+
+        if isRenderedForVideo {
+            Rectangle()
+                .fill(
+                    configuration.backgroundColorForVideo
+                )
+        } else {
+            Rectangle()
+                .fill(
+                    Gradient(stops: [
+                        .init(color: configuration.backgroundColor1, location: 0),
+                        .init(color: configuration.backgroundColor2, location: 0.5),
+                        .init(color: configuration.backgroundColor3, location: 1.0),
+                    ])
+                )
+
+        }
+
     }
 
     var mountainsView: some View {
@@ -302,7 +380,12 @@ struct AnimationView: View {
 
                 ZStack {
                     background
-                    configuration.foregroundColor.opacity(nearness * nearness)
+
+                    if isRenderedForVideo {
+                        configuration.foregroundColor.opacity(nearness * nearness)
+                    } else {
+                        mountain.color.opacity(nearness)
+                    }
                 }
                 .clipShape(
                     Mountain(
@@ -583,12 +666,15 @@ struct AnimationView: View {
     }
 
     func generateMountainConfiguration() -> MountainConfiguration {
+        let seed = UInt64.random(in: UInt64.min...UInt64.max)
         return MountainConfiguration(
             maxPointsPerDepth: max(
                 1,
                 max(configuration.maxPointsPerDepth,  Int(CGFloat(configuration.maxPointsPerDepth) * aspectRatio))
             ),
-            depth: configuration.depth
+            depth: configuration.depth,
+            seed: seed,
+            color: configuration.mountainColor(seed: seed)
         )
     }
 }
@@ -597,15 +683,17 @@ struct MountainConfiguration: Identifiable {
     let maxPointsPerDepth: Int
     let depth: Int
     let seed: UInt64
+    let color: Color
     let id = UUID()
 
     let ridgeUnitPoints: [CGPoint]
 
-    init(maxPointsPerDepth: Int, depth: Int, seed: UInt64? = nil) {
+    init(maxPointsPerDepth: Int, depth: Int, seed: UInt64? = nil, color: Color = .black) {
         self.maxPointsPerDepth = maxPointsPerDepth
         self.depth = depth
         let seed = seed ?? UInt64.random(in: UInt64.min...UInt64.max)
         self.seed = seed
+        self.color = color
         var rng = SeededGenerator(seed: seed)
 
         let start = CGPoint(

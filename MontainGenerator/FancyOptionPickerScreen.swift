@@ -200,10 +200,10 @@ struct FancyOptionPickerScreen: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Pick your animation")
-                .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                .font(.system(.largeTitle, design: .serif).weight(.bold))
 
             Text("Tap an option to start immediately.")
-                .font(.system(.body, design: .rounded))
+                .font(.system(.body, design: .serif))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -250,14 +250,14 @@ struct SelectableCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(option.title)
                         .font(
-                            .system(.headline, design: .rounded).weight(
+                            .system(.headline, design: .serif).weight(
                                 .semibold
                             )
                         )
                         .foregroundStyle(.primary)
 
                     Text(option.subtitle)
-                        .font(.system(.subheadline, design: .rounded))
+                        .font(.system(.subheadline, design: .serif))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
@@ -309,7 +309,7 @@ struct SelectedPill: View {
                 .frame(width: 10, height: 10)
 
             Text("Selected: \(title)")
-                .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                .font(.system(.subheadline, design: .serif).weight(.semibold))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
