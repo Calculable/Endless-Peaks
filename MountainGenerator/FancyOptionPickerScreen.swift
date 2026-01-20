@@ -1,6 +1,6 @@
 //
 //  OptionCard.swift
-//  MontainGenerator
+//  MountainGenerator
 //
 //  Created by Jan Huber on 04.01.2026.
 //

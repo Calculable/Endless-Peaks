@@ -1,6 +1,6 @@
 //
 //  DisplayRedrawDriver.swift
-//  MontainGenerator
+//  MountainGenerator
 //
 //  Created by Jan Huber on 01.01.2026.
 //

@@ -1,6 +1,6 @@
 //
 //  SeededGenerator.swift
-//  MontainGenerator
+//  MountainGenerator
 //
 //  Created by Jan Huber on 03.01.2026.
 //

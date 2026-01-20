@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3DD1CB672EF0A3F100F535B0"
-               BuildableName = "MontainGenerator.app"
-               BlueprintName = "MontainGenerator"
-               ReferencedContainer = "container:MontainGenerator.xcodeproj">
+               BuildableName = "MountainGenerator.app"
+               BlueprintName = "MountainGenerator"
+               ReferencedContainer = "container:MountainGenerator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3DD1CB672EF0A3F100F535B0"
-            BuildableName = "MontainGenerator.app"
-            BlueprintName = "MontainGenerator"
-            ReferencedContainer = "container:MontainGenerator.xcodeproj">
+            BuildableName = "MountainGenerator.app"
+            BlueprintName = "MountainGenerator"
+            ReferencedContainer = "container:MountainGenerator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3DD1CB672EF0A3F100F535B0"
-            BuildableName = "MontainGenerator.app"
-            BlueprintName = "MontainGenerator"
-            ReferencedContainer = "container:MontainGenerator.xcodeproj">
+            BuildableName = "MountainGenerator.app"
+            BlueprintName = "MountainGenerator"
+            ReferencedContainer = "container:MountainGenerator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
