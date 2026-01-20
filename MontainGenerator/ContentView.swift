@@ -499,10 +499,10 @@ struct AnimationView: View {
 
                     //print(aspectRatio)
                     //regenerateMountains()
-                    /*driver = DisplayRedrawDriver { t in
+                    driver = DisplayRedrawDriver { t in
                         engine.nextFrame()
                     }
-                    driver?.start()*/
+                    driver?.start()
 
                 }
                 .onDisappear {

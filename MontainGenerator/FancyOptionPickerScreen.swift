@@ -105,7 +105,7 @@ struct FancyOptionPickerScreen: View {
         NavigationStack {
             VStack(spacing: 16) {
 
-                Button("Export Video") {
+               /* Button("Export Video") {
 
                     let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
                     let outputURL = documentsURL.appendingPathComponent("myVideo.mp4")
@@ -137,7 +137,7 @@ struct FancyOptionPickerScreen: View {
                             print("Export failed:", error)
                         }
                     }
-                }
+                }*/
 
                 #if os(macOS)
                 header
