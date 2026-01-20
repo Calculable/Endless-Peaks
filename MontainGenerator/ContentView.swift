@@ -37,6 +37,7 @@ class MountainsConfiguration {
     var backgroundColor3 = Color.white
     var foregroundColor = Color.black
     var rounded: Bool = true
+    var musicFileName: String? = nil
 
     var backgroundGradient: Gradient {
         Gradient(stops: [
@@ -59,7 +60,8 @@ class MountainsConfiguration {
         backgroundColor2: Color = Color.random(),
         backgroundColor3: SwiftUICore.Color = Color.white,
         foregroundColor: SwiftUICore.Color = Color.black,
-        rounded: Bool = true
+        rounded: Bool = true,
+        musicFileName: String? = nil
     ) {
         self.numberOfMountains = numberOfMountains
         self.maxPointsPerDepth = maxPointsPerDepth
@@ -74,6 +76,7 @@ class MountainsConfiguration {
         self.backgroundColor3 = backgroundColor3
         self.foregroundColor = foregroundColor
         self.rounded = rounded
+        self.musicFileName = musicFileName
     }
 
     static let appenzell = MountainsConfiguration(
@@ -89,7 +92,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#C2FF3EFF"),
         backgroundColor3: Color.init(hex: "#FEFFFFFF"),
         foregroundColor: Color.black,
-        rounded: true
+        rounded: true,
+        musicFileName: "Appenzell"
     )
 
     static let yosemite = MountainsConfiguration(
@@ -105,7 +109,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#8D9FA6FF"),
         backgroundColor3: Color.init(hex: "#0D0B01FF"),
         foregroundColor: Color.black,
-        rounded: false
+        rounded: false,
+        musicFileName: "Yosemite_Valley"
     )
 
     static let dolomites = MountainsConfiguration(
@@ -121,7 +126,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#BFBFB9FF"),
         backgroundColor3: Color.init(hex: "#8C8B88FF"),
         foregroundColor: Color.black,
-        rounded: false
+        rounded: false,
+        musicFileName: "Dolomiten"
     )
 
     static let zhangjiajie = MountainsConfiguration(
@@ -137,7 +143,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#83A605FF"),
         backgroundColor3: Color.init(hex: "#5A7304FF"),
         foregroundColor: Color.black,
-        rounded: true
+        rounded: true,
+        musicFileName: "Zhangjiajie_National_Forest_Park"
     )
 
     static let torresDelPaine = MountainsConfiguration(
@@ -153,7 +160,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#F2984BFF"),
         backgroundColor3: Color.init(hex: "#F2845CFF"),
         foregroundColor: Color.black,
-        rounded: false
+        rounded: false,
+        musicFileName: "Torres_del_Paine"
     )
 
     static let scottishHighlands = MountainsConfiguration(
@@ -169,7 +177,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#F2CC88FF"),
         backgroundColor3: Color.init(hex: "#898C2AFF"),
         foregroundColor: Color.black,
-        rounded: true
+        rounded: true,
+        musicFileName: "Schottische_Highlands"
     )
 
     static let tassiliNAjjer = MountainsConfiguration(
@@ -185,7 +194,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#E32413FF"),
         backgroundColor3: Color.init(hex: "#89A1B2FF"),
         foregroundColor: Color.black,
-        rounded: true
+        rounded: true,
+        musicFileName: "Tassili_n_Ajjer"
     )
 
     static let himalaya = MountainsConfiguration(
@@ -201,7 +211,8 @@ class MountainsConfiguration {
         backgroundColor2: Color.init(hex: "#95C6D9FF"),
         backgroundColor3: Color.init(hex: "#AFE8FFFF"),
         foregroundColor: Color.black,
-        rounded: true
+        rounded: true,
+        musicFileName: "Himalaya"
     )
 
     static let background = MountainsConfiguration(
@@ -261,6 +272,7 @@ struct AnimationView: View {
     @State private var didAppearOnce = false
 
     @StateObject var engine: AnimationEngine
+    @State private var musicPlayer = BackgroundMusicPlayer()
 
     init(
         configuration: MountainsConfiguration = .tassiliNAjjer,
@@ -497,6 +509,8 @@ struct AnimationView: View {
                         didAppearOnce = true
                     }
 
+                    musicPlayer.play(resourceName: configuration.musicFileName)
+
                     //print(aspectRatio)
                     //regenerateMountains()
                     driver = DisplayRedrawDriver { t in
@@ -506,7 +520,8 @@ struct AnimationView: View {
 
                 }
                 .onDisappear {
-                    //driver?.stop()
+                    driver?.stop()
+                    musicPlayer.stop()
                 }
                 .onChange(of: self.configuration.maxPointsPerDepth) {
                     regenerateMountains()
