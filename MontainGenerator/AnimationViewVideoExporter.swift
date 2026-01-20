@@ -33,8 +33,14 @@ public final class AnimationVideoExporter {
                 in: .userDomainMask
             ).first ?? FileManager.default.temporaryDirectory
 
+        #if canImport(AppKit)
+        let outputExtension = "mov"
+        #else
+        let outputExtension = "mp4"
+        #endif
+
         let outputURL = documentsURL.appendingPathComponent(
-            "\(outputName).mp4"
+            "\(outputName).\(outputExtension)"
         )
 
         if FileManager.default.fileExists(
@@ -79,13 +85,38 @@ public final class AnimationVideoExporter {
             host.frame = container.bounds
             #endif
 
-            // Basic H.264 writer
-            let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
-            let videoSettings: [String: Any] = [
-                AVVideoCodecKey: AVVideoCodecType.h264,
+            #if canImport(AppKit)
+            let fileType: AVFileType = .mov
+            let codec: AVVideoCodecType = .proRes422
+            #else
+            let fileType: AVFileType = .mp4
+            let codec: AVVideoCodecType = .h264
+            #endif
+
+            // Video writer
+            let writer = try AVAssetWriter(outputURL: outputURL, fileType: fileType)
+
+            var videoSettings: [String: Any] = [
+                AVVideoCodecKey: codec,
                 AVVideoWidthKey: Int(size.width),
                 AVVideoHeightKey: Int(size.height)
             ]
+
+            if codec == .h264 || codec == .hevc {
+                // High bitrate + intra-only (all-keyframe) to avoid temporal artifacts / shimmer.
+                // Note: this can create very large files.
+                let pixelsPerSecond = Double(size.width * size.height) * Double(fps)
+                let bitsPerPixel: Double = 0.30
+                let targetBitRate = Int(pixelsPerSecond * bitsPerPixel)
+
+                videoSettings[AVVideoCompressionPropertiesKey] = [
+                    AVVideoAverageBitRateKey: targetBitRate,
+                    AVVideoExpectedSourceFrameRateKey: fps,
+                    AVVideoMaxKeyFrameIntervalKey: 1,
+                    AVVideoAllowFrameReorderingKey: false
+                ]
+            }
+
             let input = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
             input.expectsMediaDataInRealTime = false
 

@@ -134,7 +134,7 @@ struct FancyOptionPickerScreen: View {
                     Button("Export Video") {
 
                         export(configuration: .appenzell, durationInSeconds: 1)
-                        export(configuration: .dolomites, durationInSeconds: 1)
+                      /*  export(configuration: .dolomites, durationInSeconds: 1)
                         export(configuration: .himalaya, durationInSeconds: 1)
                         export(
                             configuration: .scottishHighlands,
@@ -152,7 +152,7 @@ struct FancyOptionPickerScreen: View {
                         export(
                             configuration: .zhangjiajie,
                             durationInSeconds: 1
-                        )
+                        )*/
 
                     }
                 #endif
