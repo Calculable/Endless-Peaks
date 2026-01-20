@@ -59,7 +59,8 @@ public final class AnimationVideoExporter {
             let rootView = AnimationView(
                 configuration: configuration,
                 engine: engine,
-                initialAspectRatio: size.width / max(size.height, 1)
+                initialAspectRatio: size.width / max(size.height, 1),
+                renderMode: .export
             )
                 .frame(width: size.width, height: size.height)
 

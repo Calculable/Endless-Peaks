@@ -8,8 +8,6 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Model
-
 struct OptionCard: Identifiable, Hashable {
     let id = UUID()
     let title: String
@@ -27,11 +25,9 @@ struct OptionCard: Identifiable, Hashable {
     }
 }
 
-// MARK: - Screen
-
 struct FancyOptionPickerScreen: View {
-    @State private var selectedOption: OptionCard? = nil
-    @State private var navigateTo: OptionCard? = nil  // 👈 NEW
+    @State private var selectedOption: OptionCard?
+    @State private var navigateTo: OptionCard?
 
     private let options: [OptionCard] = [
         .init(
@@ -102,11 +98,11 @@ struct FancyOptionPickerScreen: View {
         ]
     }
 
+    #if DEBUG
     private func export(
         configuration: MountainsConfiguration,
         durationInSeconds: Int
     ) {
-
         let engine = AnimationEngine(speed: configuration.speed)
 
         let exporter = AnimationVideoExporter()
@@ -126,34 +122,31 @@ struct FancyOptionPickerScreen: View {
         }
     }
 
+    private func exportSampleVideos(durationInSeconds: Int = 1) {
+        let configurations: [MountainsConfiguration] = [
+            .appenzell,
+            .dolomites,
+            .himalaya,
+            .scottishHighlands,
+            .tassiliNAjjer,
+            .torresDelPaine,
+            .yosemite,
+            .zhangjiajie,
+        ]
+
+        for configuration in configurations {
+            export(configuration: configuration, durationInSeconds: durationInSeconds)
+        }
+    }
+    #endif
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
 
                 #if DEBUG
-                    Button("Export Video") {
-
-                        export(configuration: .appenzell, durationInSeconds: 1)
-                      /*  export(configuration: .dolomites, durationInSeconds: 1)
-                        export(configuration: .himalaya, durationInSeconds: 1)
-                        export(
-                            configuration: .scottishHighlands,
-                            durationInSeconds: 1
-                        )
-                        export(
-                            configuration: .tassiliNAjjer,
-                            durationInSeconds: 1
-                        )
-                        export(
-                            configuration: .torresDelPaine,
-                            durationInSeconds: 1
-                        )
-                        export(configuration: .yosemite, durationInSeconds: 1)
-                        export(
-                            configuration: .zhangjiajie,
-                            durationInSeconds: 1
-                        )*/
-
+                    Button("Export Sample Videos") {
+                        exportSampleVideos(durationInSeconds: 1)
                     }
                 #endif
 
@@ -197,7 +190,6 @@ struct FancyOptionPickerScreen: View {
             #if os(macOS)
                 .padding(.vertical, 20)
             #endif
-            //.background(background)
 
             #if os(macOS)
                 .navigationTitle("Mountain Generator")
@@ -212,8 +204,6 @@ struct FancyOptionPickerScreen: View {
         }
     }
 
-    // MARK: - Pieces
-
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Pick your animation")
@@ -226,17 +216,7 @@ struct FancyOptionPickerScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
     }
-
-    private var background: some View {
-        AnimationView(
-            configuration: .background,
-            engine: .init(speed: MountainsConfiguration.background.speed)
-        )
-        .ignoresSafeArea()
-    }
 }
-
-// MARK: - Card View
 
 struct SelectableCard: View {
     let option: OptionCard
@@ -270,7 +250,7 @@ struct SelectableCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(option.title)
                         .font(
-                            .system(.headline, design: .serif).weight(
+                            .system(.headline, design: .default).weight(
                                 .semibold
                             )
                         )
@@ -315,38 +295,6 @@ struct SelectableCard: View {
             )
     }
 }
-
-// MARK: - Selected Pill (unchanged, unused)
-
-struct SelectedPill: View {
-    let title: String
-    let color: Color
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(color)
-                .frame(width: 10, height: 10)
-
-            Text("Selected: \(title)")
-                .font(.system(.subheadline, design: .default).weight(.semibold))
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            Capsule()
-                .fill(.thinMaterial)
-                .overlay(
-                    Capsule().strokeBorder(
-                        Color.primary.opacity(0.08),
-                        lineWidth: 1
-                    )
-                )
-        )
-    }
-}
-
-// MARK: - Previews
 
 struct FancyOptionPickerScreen_Previews: PreviewProvider {
     static var previews: some View {

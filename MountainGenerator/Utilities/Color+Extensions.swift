@@ -1,22 +1,15 @@
-//
-//  Color+Extension.swift
-//  MountainGenerator
-//
-//  Created by Jan Huber on 03.01.2026.
-//
 import SwiftUI
 
 #if canImport(UIKit)
-    import UIKit
-    typealias PlatformColor = UIColor
+import UIKit
+typealias PlatformColor = UIColor
 #elseif canImport(AppKit)
-    import AppKit
-    typealias PlatformColor = NSColor
+import AppKit
+typealias PlatformColor = NSColor
 #endif
 
 extension Color {
-
-    public static func random(randomOpacity: Bool = false) -> Color {
+    static func random(randomOpacity: Bool = false) -> Color {
         Color(
             red: .random(in: 0...1),
             green: .random(in: 0...1),
