@@ -38,7 +38,7 @@ class MountainsConfiguration {
     var backgroundColorForVideo = Color.random()
     var foregroundColor = Color.black
     var rounded: Bool = true
-    var musicFileName: String? = nil
+    var musicFileName: String
     var mountainPalette: [Color] = []
 
     init(
@@ -56,7 +56,7 @@ class MountainsConfiguration {
         backgroundColorForVideo: Color = Color.random(),
         foregroundColor: SwiftUICore.Color = Color.black,
         rounded: Bool = true,
-        musicFileName: String? = nil,
+        musicFileName: String = "",
         mountainPalette: [Color] = []
     ) {
         self.numberOfMountains = numberOfMountains
@@ -336,15 +336,37 @@ struct AnimationView: View {
 
     init(
         configuration: MountainsConfiguration = .tassiliNAjjer,
-        engine: AnimationEngine
+        engine: AnimationEngine,
+        initialAspectRatio: CGFloat = 1
     ) {
         _driver = State(initialValue: nil)
-        _aspectRatio = State(initialValue: 1)
+        _aspectRatio = State(initialValue: initialAspectRatio)
         _configuration = State(initialValue: configuration)
-        _mountains = State(initialValue: [])
+        _mountains = State(initialValue: Self.makeInitialMountains(configuration: configuration, aspectRatio: initialAspectRatio))
 
         _engine = ObservedObject(wrappedValue: engine)
 
+    }
+
+    private static func makeInitialMountains(
+        configuration: MountainsConfiguration,
+        aspectRatio: CGFloat
+    ) -> [MountainConfiguration] {
+        (0..<configuration.numberOfMountains).map { _ in
+            let seed = UInt64.random(in: UInt64.min...UInt64.max)
+            return MountainConfiguration(
+                maxPointsPerDepth: max(
+                    1,
+                    max(
+                        configuration.maxPointsPerDepth,
+                        Int(CGFloat(configuration.maxPointsPerDepth) * aspectRatio)
+                    )
+                ),
+                depth: configuration.depth,
+                seed: seed,
+                color: configuration.mountainColor(seed: seed)
+            )
+        }
     }
 
 
@@ -382,9 +404,9 @@ struct AnimationView: View {
                     background
 
                     if isRenderedForVideo {
-                        configuration.foregroundColor.opacity(nearness * nearness)
-                    } else {
                         mountain.color.opacity(nearness)
+                    } else {
+                        configuration.foregroundColor.opacity(nearness * nearness)
                     }
                 }
                 .clipShape(
@@ -588,7 +610,9 @@ struct AnimationView: View {
                         }
                     }
 
-                    musicPlayer.play(resourceName: configuration.musicFileName)
+                    if isRenderedForVideo == false {
+                        musicPlayer.play(resourceName: configuration.musicFileName)
+                    }
 
                     //regenerateMountains()
                     let newDriver = DisplayRedrawDriver { _ in
@@ -597,7 +621,9 @@ struct AnimationView: View {
                     driver = newDriver
                     Task { @MainActor in
                         await Task.yield()
-                        newDriver.start()
+                        if isRenderedForVideo == false {
+                            newDriver.start()
+                        }
                     }
 
                 }

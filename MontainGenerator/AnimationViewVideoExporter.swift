@@ -20,88 +20,133 @@ public final class AnimationVideoExporter {
     func export(
         configuration: MountainsConfiguration,
         engine: AnimationEngine,
-        outputURL: URL,
+        outputName: String,
         size: CGSize,
         fps: Int = 60,
-        frameCount: Int
+        frameCount: Int,
+        progress: (@MainActor (_ renderedFrames: Int, _ totalFrames: Int) -> Void)? = nil
     ) async throws {
-        try? FileManager.default.removeItem(at: outputURL)
 
-        // Build the SwiftUI view once at the exact video size
-        let rootView = AnimationView(configuration: configuration, engine: engine)
-            .frame(width: size.width, height: size.height)
+        let documentsURL =
+            FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first ?? FileManager.default.temporaryDirectory
 
-        // Host it for snapshotting
-        #if canImport(UIKit)
-        let host = UIHostingController(rootView: rootView)
-        host.view.bounds = CGRect(origin: .zero, size: size)
-        host.view.backgroundColor = .clear
-
-        let container = PlatformView(frame: host.view.bounds)
-        container.backgroundColor = .clear
-        container.addSubview(host.view)
-        host.view.frame = container.bounds
-        host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        #elseif canImport(AppKit)
-        let host = NSHostingView(rootView: rootView)
-        host.frame = CGRect(origin: .zero, size: size)
-
-        let container = PlatformView(frame: host.bounds)
-        container.wantsLayer = true
-        container.layer?.backgroundColor = NSColor.clear.cgColor
-        container.addSubview(host)
-        host.frame = container.bounds
-        #endif
-
-        // Basic H.264 writer
-        let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
-        let videoSettings: [String: Any] = [
-            AVVideoCodecKey: AVVideoCodecType.h264,
-            AVVideoWidthKey: Int(size.width),
-            AVVideoHeightKey: Int(size.height)
-        ]
-        let input = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
-        input.expectsMediaDataInRealTime = false
-
-        let adaptor = AVAssetWriterInputPixelBufferAdaptor(
-            assetWriterInput: input,
-            sourcePixelBufferAttributes: [
-                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-                kCVPixelBufferWidthKey as String: Int(size.width),
-                kCVPixelBufferHeightKey as String: Int(size.height)
-            ]
+        let outputURL = documentsURL.appendingPathComponent(
+            "\(outputName).mp4"
         )
 
-        guard writer.canAdd(input) else {
-            throw NSError(domain: "AnimationVideoExporter", code: -10, userInfo: [NSLocalizedDescriptionKey: "Cannot add input"]) }
-        writer.add(input)
-
-        guard writer.startWriting() else {
-            throw writer.error ?? NSError(domain: "AnimationVideoExporter", code: -11, userInfo: [NSLocalizedDescriptionKey: "Failed to start writing"]) }
-        writer.startSession(atSourceTime: .zero)
-
-        let frameDuration = CMTime(value: 1, timescale: CMTimeScale(fps))
-
-        for frameIndex in 0..<frameCount {
-            engine.nextFrame()
-            await tickMainRunLoopOnce()
-
-            guard let cgImage = snapshotCGImage(of: container, size: size) else { continue }
-            guard let pixelBuffer = makePixelBuffer(width: Int(size.width), height: Int(size.height)) else { continue }
-            draw(cgImage, into: pixelBuffer)
-
-            while !input.isReadyForMoreMediaData {
-                try await Task.sleep(nanoseconds: 1_000_000)
-            }
-
-            let pts = CMTimeMultiply(frameDuration, multiplier: Int32(frameIndex))
-            if !adaptor.append(pixelBuffer, withPresentationTime: pts) {
-                throw writer.error ?? NSError(domain: "AnimationVideoExporter", code: -12, userInfo: [NSLocalizedDescriptionKey: "Failed to append frame"]) }
+        if FileManager.default.fileExists(
+            atPath: outputURL.path
+        ) {
+            try? FileManager.default.removeItem(at: outputURL)
         }
 
-        input.markAsFinished()
-        await withCheckedContinuation { cont in writer.finishWriting { cont.resume() } }
-        if let err = writer.error { throw err }
+
+        do {
+            progress?(0, frameCount)
+            let startedAt = Date()
+            print("Export started: \(frameCount) frames @ \(fps) fps, \(Int(size.width))x\(Int(size.height)) -> \(outputURL.lastPathComponent)")
+
+            // Build the SwiftUI view once at the exact video size
+            let rootView = AnimationView(
+                configuration: configuration,
+                engine: engine,
+                initialAspectRatio: size.width / max(size.height, 1)
+            )
+                .frame(width: size.width, height: size.height)
+
+            // Host it for snapshotting
+            #if canImport(UIKit)
+            let host = UIHostingController(rootView: rootView)
+            host.view.bounds = CGRect(origin: .zero, size: size)
+            host.view.backgroundColor = .clear
+
+            let container = PlatformView(frame: host.view.bounds)
+            container.backgroundColor = .clear
+            container.addSubview(host.view)
+            host.view.frame = container.bounds
+            host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            #elseif canImport(AppKit)
+            let host = NSHostingView(rootView: rootView)
+            host.frame = CGRect(origin: .zero, size: size)
+
+            let container = PlatformView(frame: host.bounds)
+            container.wantsLayer = true
+            container.layer?.backgroundColor = NSColor.clear.cgColor
+            container.addSubview(host)
+            host.frame = container.bounds
+            #endif
+
+            // Basic H.264 writer
+            let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
+            let videoSettings: [String: Any] = [
+                AVVideoCodecKey: AVVideoCodecType.h264,
+                AVVideoWidthKey: Int(size.width),
+                AVVideoHeightKey: Int(size.height)
+            ]
+            let input = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+            input.expectsMediaDataInRealTime = false
+
+            let adaptor = AVAssetWriterInputPixelBufferAdaptor(
+                assetWriterInput: input,
+                sourcePixelBufferAttributes: [
+                    kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                    kCVPixelBufferWidthKey as String: Int(size.width),
+                    kCVPixelBufferHeightKey as String: Int(size.height)
+                ]
+            )
+
+            guard writer.canAdd(input) else {
+                throw NSError(domain: "AnimationVideoExporter", code: -10, userInfo: [NSLocalizedDescriptionKey: "Cannot add input"]) }
+            writer.add(input)
+
+            guard writer.startWriting() else {
+                throw writer.error ?? NSError(domain: "AnimationVideoExporter", code: -11, userInfo: [NSLocalizedDescriptionKey: "Failed to start writing"]) }
+            writer.startSession(atSourceTime: .zero)
+
+            let frameDuration = CMTime(value: 1, timescale: CMTimeScale(fps))
+
+            for frameIndex in 0..<frameCount {
+                try Task.checkCancellation()
+
+                engine.nextFrame()
+                await tickMainRunLoopOnce()
+
+                guard let cgImage = snapshotCGImage(of: container, size: size) else { continue }
+                guard let pixelBuffer = makePixelBuffer(width: Int(size.width), height: Int(size.height)) else { continue }
+                draw(cgImage, into: pixelBuffer)
+
+                while !input.isReadyForMoreMediaData {
+                    try Task.checkCancellation()
+                    try await Task.sleep(nanoseconds: 1_000_000)
+                }
+
+                let pts = CMTimeMultiply(frameDuration, multiplier: Int32(frameIndex))
+                if !adaptor.append(pixelBuffer, withPresentationTime: pts) {
+                    throw writer.error ?? NSError(domain: "AnimationVideoExporter", code: -12, userInfo: [NSLocalizedDescriptionKey: "Failed to append frame"]) }
+
+                let rendered = frameIndex + 1
+                progress?(rendered, frameCount)
+
+                if rendered == 1 || rendered == frameCount || rendered % max(1, frameCount / 100) == 0 {
+                    let remaining = frameCount - rendered
+                    print("\(outputName) Rendered \(rendered)/\(frameCount) frames (\(remaining) remaining)")
+                }
+            }
+
+            input.markAsFinished()
+            await withCheckedContinuation { cont in writer.finishWriting { cont.resume() } }
+            if let err = writer.error { throw err }
+
+            let elapsed = Date().timeIntervalSince(startedAt)
+            print("Export finished: \(outputURL.absoluteString) in \(String(format: "%.2fs", elapsed))")
+        } catch {
+            try? FileManager.default.removeItem(at: outputURL)
+            print("Export failed: \(error.localizedDescription)")
+            throw error
+        }
     }
 }
 

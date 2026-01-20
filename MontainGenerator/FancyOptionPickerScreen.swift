@@ -5,6 +5,7 @@
 //  Created by Jan Huber on 04.01.2026.
 //
 
+import Foundation
 import SwiftUI
 
 // MARK: - Model
@@ -30,7 +31,7 @@ struct OptionCard: Identifiable, Hashable {
 
 struct FancyOptionPickerScreen: View {
     @State private var selectedOption: OptionCard? = nil
-    @State private var navigateTo: OptionCard? = nil   // 👈 NEW
+    @State private var navigateTo: OptionCard? = nil  // 👈 NEW
 
     private let options: [OptionCard] = [
         .init(
@@ -101,46 +102,63 @@ struct FancyOptionPickerScreen: View {
         ]
     }
 
+    private func export(
+        configuration: MountainsConfiguration,
+        durationInSeconds: Int
+    ) {
+
+        let engine = AnimationEngine(speed: configuration.speed)
+
+        let exporter = AnimationVideoExporter()
+        Task { @MainActor in
+            do {
+                try await exporter.export(
+                    configuration: configuration,
+                    engine: engine,
+                    outputName: configuration.musicFileName,
+                    size: CGSize(width: 3840, height: 2160),
+                    fps: 60,
+                    frameCount: durationInSeconds * 60
+                )
+            } catch {
+                print("Export failed:", error)
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
 
-               /* Button("Export Video") {
+                #if DEBUG
+                    Button("Export Video") {
 
-                    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                    let outputURL = documentsURL.appendingPathComponent("myVideo.mp4")
+                        export(configuration: .appenzell, durationInSeconds: 1)
+                        export(configuration: .dolomites, durationInSeconds: 1)
+                        export(configuration: .himalaya, durationInSeconds: 1)
+                        export(
+                            configuration: .scottishHighlands,
+                            durationInSeconds: 1
+                        )
+                        export(
+                            configuration: .tassiliNAjjer,
+                            durationInSeconds: 1
+                        )
+                        export(
+                            configuration: .torresDelPaine,
+                            durationInSeconds: 1
+                        )
+                        export(configuration: .yosemite, durationInSeconds: 1)
+                        export(
+                            configuration: .zhangjiajie,
+                            durationInSeconds: 1
+                        )
 
-                    if FileManager.default.fileExists(atPath: outputURL.path) {
-                        try! FileManager.default.removeItem(at: outputURL)
                     }
-
-                    Task { @MainActor in
-                        do {
-
-                            let configuration = MountainsConfiguration.zhangjiajie
-                            let engine =  AnimationEngine(speed: configuration.speed)
-
-                            let exporter = AnimationVideoExporter()
-
-                            try await exporter.export(
-                                configuration: configuration,
-                                engine: engine,
-                                outputURL: outputURL,
-                                size: CGSize(width: 3840, height: 2160),
-                                fps: 60,
-                                frameCount: 5
-                            )
-
-
-                            print("Video written to:", outputURL)
-                        } catch {
-                            print("Export failed:", error)
-                        }
-                    }
-                }*/
+                #endif
 
                 #if os(macOS)
-                header
+                    header
                 #endif
 
                 ScrollView {
@@ -177,17 +195,16 @@ struct FancyOptionPickerScreen: View {
                 }
             }
             #if os(macOS)
-            .padding(.vertical, 20)
+                .padding(.vertical, 20)
             #endif
             //.background(background)
 
-#if os(macOS)
-            .navigationTitle("Mountain Generator")
+            #if os(macOS)
+                .navigationTitle("Mountain Generator")
 
             #else
-            .navigationTitle("Pick your animation")
+                .navigationTitle("Pick your animation")
             #endif
-
 
             .navigationDestination(item: $navigateTo) { option in
                 FullscreenAnimationScreen(configuration: option.configuration)
@@ -200,10 +217,10 @@ struct FancyOptionPickerScreen: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Pick your animation")
-                .font(.system(.largeTitle, design: .serif).weight(.bold))
+                .font(.system(.largeTitle, design: .default).weight(.bold))
 
             Text("Tap an option to start immediately.")
-                .font(.system(.body, design: .serif))
+                .font(.system(.body, design: .default))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -211,8 +228,11 @@ struct FancyOptionPickerScreen: View {
     }
 
     private var background: some View {
-        AnimationView(configuration: .background, engine: .init(speed: MountainsConfiguration.background.speed))
-            .ignoresSafeArea()
+        AnimationView(
+            configuration: .background,
+            engine: .init(speed: MountainsConfiguration.background.speed)
+        )
+        .ignoresSafeArea()
     }
 }
 
@@ -257,7 +277,7 @@ struct SelectableCard: View {
                         .foregroundStyle(.primary)
 
                     Text(option.subtitle)
-                        .font(.system(.subheadline, design: .serif))
+                        .font(.system(.subheadline, design: .default))
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
@@ -309,7 +329,7 @@ struct SelectedPill: View {
                 .frame(width: 10, height: 10)
 
             Text("Selected: \(title)")
-                .font(.system(.subheadline, design: .serif).weight(.semibold))
+                .font(.system(.subheadline, design: .default).weight(.semibold))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
