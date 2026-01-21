@@ -187,10 +187,10 @@ struct FancyOptionPickerScreen: View {
             #endif
 
             #if os(macOS)
-                .navigationTitle("Mountain Generator")
+                .navigationTitle("Endless Peaks")
 
             #else
-                .navigationTitle("Pick your animation")
+                .navigationTitle("Endless Peaks")
             #endif
 
             .navigationDestination(item: $navigateTo) { option in

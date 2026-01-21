@@ -16,6 +16,11 @@
 			path = MountainGenerator;
 			sourceTree = "<group>";
 		};
+		3DE56D652F205907001C04B7 /* Documentation */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Documentation;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +39,7 @@
 			children = (
 				3DD1CB6A2EF0A3F100F535B0 /* MountainGenerator */,
 				3DD1CB692EF0A3F100F535B0 /* Products */,
+				3DE56D652F205907001C04B7 /* Documentation */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +68,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				3DD1CB6A2EF0A3F100F535B0 /* MountainGenerator */,
+				3DE56D652F205907001C04B7 /* Documentation */,
 			);
 			name = MountainGenerator;
 			packageProductDependencies = (
