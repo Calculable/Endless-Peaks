@@ -1,10 +1,3 @@
-//
-//  OptionCard.swift
-//  MountainGenerator
-//
-//  Created by Jan Huber on 04.01.2026.
-//
-
 import Foundation
 import SwiftUI
 
@@ -145,9 +138,9 @@ struct FancyOptionPickerScreen: View {
             VStack(spacing: 16) {
 
                 #if DEBUG
-                    Button("Export Sample Videos") {
+                    /*Button("Export Sample Videos") {
                         exportSampleVideos(durationInSeconds: 1)
-                    }
+                    }*/
                 #endif
 
                 #if os(macOS)

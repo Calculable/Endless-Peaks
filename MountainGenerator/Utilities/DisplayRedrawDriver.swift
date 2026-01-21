@@ -1,11 +1,3 @@
-//
-//  DisplayRedrawDriver.swift
-//  MountainGenerator
-//
-//  Created by Jan Huber on 01.01.2026.
-//
-
-
 #if os(iOS) || os(tvOS) || os(visionOS)
     import QuartzCore
 #elseif os(macOS)

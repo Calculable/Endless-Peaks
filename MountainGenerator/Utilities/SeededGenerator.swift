@@ -1,11 +1,3 @@
-//
-//  SeededGenerator.swift
-//  MountainGenerator
-//
-//  Created by Jan Huber on 03.01.2026.
-//
-
-
 struct SeededGenerator: RandomNumberGenerator {
     private var state: UInt64
 
