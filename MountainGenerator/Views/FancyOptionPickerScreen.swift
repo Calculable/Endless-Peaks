@@ -179,6 +179,8 @@ struct FancyOptionPickerScreen: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
                 }
+
+                creditsFooter
             }
             #if os(macOS)
                 .padding(.vertical, 20)
@@ -199,7 +201,7 @@ struct FancyOptionPickerScreen: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Pick your animation")
+            Text("Where shall we fly today?")
                 .font(.system(.largeTitle, design: .default).weight(.bold))
 
             Text("Tap an option to start immediately.")
@@ -208,6 +210,23 @@ struct FancyOptionPickerScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
+    }
+
+    private var creditsFooter: some View {
+        VStack(spacing: 8) {
+            Divider()
+
+            Text(
+                .init(
+                    "Icon “mountain-2-fill” by [Mingcute](https://www.mingcute.com), used via [Icônes](https://icones.js.org). Licensed under Apache-2.0."
+                )
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
     }
 }
 
