@@ -178,9 +178,10 @@ struct FancyOptionPickerScreen: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
-                }
 
-                creditsFooter
+                    creditsFooter
+                        .padding(.top)
+                }
             }
             #if os(macOS)
                 .padding(.vertical, 20)
